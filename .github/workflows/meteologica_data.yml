@@ -29,7 +29,5 @@ jobs:
       env:
         SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
         SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
-        EPIAS_USERNAME: ${{ secrets.EPIAS_USERNAME }}
-        EPIAS_PASSWORD: ${{ secrets.EPIAS_PASSWORD }}
         XTRADERS_USERNAME: ${{ secrets.XTRADERS_USERNAME }}
         XTRADERS_PASSWORD: ${{ secrets.XTRADERS_PASSWORD }}
