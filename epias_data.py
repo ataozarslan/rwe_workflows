@@ -258,6 +258,7 @@ with engine.begin() as conn:
         )
 
         df.to_sql(table_name, conn, if_exists='append', index=False, schema='epias', method='multi')
+        print(f"{table_name} was uploaded!")
 
-print(f"{datetime.now(turkey_timezone).isoformat()} data was uploaded to DB!")
+print(f"All data was uploaded to DB at {datetime.now(turkey_timezone).isoformat()}!")
 print("Succeed!")
