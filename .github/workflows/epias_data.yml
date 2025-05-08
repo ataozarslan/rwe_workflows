@@ -2,8 +2,9 @@ name: Daily EPIAS Data Fetch
 
 on:
   schedule:
-    - cron: '30 11 * * *'  # UTC 11:00 = Türkiye saatiyle 14:00
+    - cron: '0 11 * * *'  # UTC 11:00 = Türkiye saatiyle 14:00
     - cron: '0 17 * * *'  # UTC 17:00 = Türkiye saatiyle 20:00
+    - cron: '0 12 * * *'
   workflow_dispatch:
 
 jobs:
@@ -31,5 +32,3 @@ jobs:
         SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
         EPIAS_USERNAME: ${{ secrets.EPIAS_USERNAME }}
         EPIAS_PASSWORD: ${{ secrets.EPIAS_PASSWORD }}
-        XTRADERS_USERNAME: ${{ secrets.XTRADERS_USERNAME }}
-        XTRADERS_PASSWORD: ${{ secrets.XTRADERS_PASSWORD }}
