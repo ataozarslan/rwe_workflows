@@ -2,8 +2,9 @@ name: Daily EPIAS Data Fetch
 
 on:
   schedule:
-    - cron: '0 11 * * *'  # UTC 11:00 = Türkiye saatiyle 14:00
-  workflow_dispatch:      # Elle de tetikleyebilmek için
+    - cron: '15 11 * * *'  # UTC 11:00 = Türkiye saatiyle 14:00
+    - cron: '15 17 * * *'  # UTC 17:00 = Türkiye saatiyle 20:00
+  workflow_dispatch:
 
 jobs:
   run-script:
