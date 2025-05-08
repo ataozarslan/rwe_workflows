@@ -33,7 +33,7 @@ tomorrow_start = today_start + timedelta(days=1)
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/mcp"
 
-if datetime.now().hour < 14:
+if datetime.now(turkey_timezone).hour < 14:
     response_url = requests.post(
         service_url,
         json={"startDate": str(month_start.isoformat()),
@@ -195,7 +195,7 @@ kgüp_df = pd.DataFrame.from_records(response['items'])
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/dpp-first-version"
 
-if datetime.now().hour < 14:
+if datetime.now(turkey_timezone).hour < 14:
     response_url = requests.post(
         service_url,
         json={"startDate": str(month_start.isoformat()),
