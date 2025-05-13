@@ -414,6 +414,7 @@ tables = {
 with engine.begin() as conn:
     for table_name, df in tables.items():
         df["From yyyy-mm-dd hh:mm"]  = pd.to_datetime(df["From yyyy-mm-dd hh:mm"])
+        df["From yyyy-mm-dd hh:mm"]  = df["From yyyy-mm-dd hh:mm"].astype(str)
         df.columns = df.columns.str.replace(' ','-').str.replace(':','-')
         timestamps = df["From-yyyy-mm-dd-hh-mm"].unique().tolist()
 
