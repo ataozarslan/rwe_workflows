@@ -2,9 +2,7 @@ name: Daily EPIAS Data Fetch
 
 on:
   schedule:
-    - cron: '0 11 * * *'  # UTC 11:00 = Türkiye saatiyle 14:00
-    - cron: '0 17 * * *'  # UTC 17:00 = Türkiye saatiyle 20:00
-    - cron: '0 2 * * *' # UTC 02:00 = Türkiye saatiyle 05:00
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 jobs:
