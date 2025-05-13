@@ -263,9 +263,9 @@ tables = {
     "system_direction": dgp_df,
     "yal": yal_df,
     "yat": yat_df,
-    "realtime_generation": realtime_generation_df
+    "realtime_generation": realtime_generation_df,
     "kgüp_v1": kgüp_v1_df,
-    "kgüp": kgüp_df,
+    "kgüp": kgüp_df
 }
 
 with engine.begin() as conn:
