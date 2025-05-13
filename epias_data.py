@@ -157,6 +157,28 @@ yat_df['yat_total'] = yat_df['yat0'] + yat_df['yat1'] + yat_df['yat2']
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
+service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/realtime-generation"
+
+response_url = requests.post(
+    service_url,
+    json={"startDate": str(month_start.isoformat()),
+        "endDate": str(tomorrow_start.isoformat())},
+    headers={"Accept-Language":"en",
+            "Accept":"application/json",
+            "Content-Type":"application/json",
+            "TGT":tgt_code}
+            )
+    
+if response_url.status_code == 200:
+    response = response_url.json()
+    
+else:
+    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
+
+realtime_generation_df = pd.DataFrame.from_records(response['items'])
+
+#---------------------------------------------------------------------------------------------------------------------------------
+
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/dpp"
 
 if datetime.now().hour < 14:
@@ -241,6 +263,7 @@ tables = {
     "system_direction": dgp_df,
     "yal": yal_df,
     "yat": yat_df,
+    "realtime_generation": realtime_generation_df
     "kgüp_v1": kgüp_v1_df,
     "kgüp": kgüp_df,
 }
