@@ -15,7 +15,7 @@ data = {
     "username":username,
     "password":password}
 
-response_tgt = requests.post(url, data=data, headers={"Content-Type": "application/x-www-form-urlencoded","Accept": "text/plain"})
+response_tgt = requests.post(url, data=data, headers={"Content-Type": "application/x-www-form-urlencoded","Accept": "text/plain"}, timeout=30)
 
 if response_tgt.status_code == 201:
     tgt_code = response_tgt.text
@@ -41,7 +41,8 @@ if datetime.now(turkey_timezone).hour < 14:
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code}
+                "TGT":tgt_code},
+        timeout=30
     )
 
 else:
@@ -52,7 +53,8 @@ else:
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code}
+                "TGT":tgt_code},
+        timeout=30
     )
 
 if response_url.status_code == 200:
@@ -74,7 +76,8 @@ response_url = requests.post(
     headers={"Accept-Language":"en",
             "Accept":"application/json",
             "Content-Type":"application/json",
-            "TGT":tgt_code}
+            "TGT":tgt_code},
+    timeout=30
     )
 
 if response_url.status_code == 200:
@@ -96,7 +99,8 @@ response_url = requests.post(
     headers={"Accept-Language":"en",
             "Accept":"application/json",
             "Content-Type":"application/json",
-            "TGT":tgt_code}
+            "TGT":tgt_code},
+    timeout=30
     )
 
 if response_url.status_code == 200:
@@ -118,7 +122,8 @@ response_url = requests.post(
     headers={"Accept-Language":"en",
             "Accept":"application/json",
             "Content-Type":"application/json",
-            "TGT":tgt_code}
+            "TGT":tgt_code},
+    timeout=30
     )
 
 if response_url.status_code == 200:
@@ -142,7 +147,8 @@ response_url = requests.post(
     headers={"Accept-Language":"en",
             "Accept":"application/json",
             "Content-Type":"application/json",
-            "TGT":tgt_code}
+            "TGT":tgt_code},
+    timeout=30
     )
 
 if response_url.status_code == 200:
@@ -166,7 +172,8 @@ response_url = requests.post(
     headers={"Accept-Language":"en",
             "Accept":"application/json",
             "Content-Type":"application/json",
-            "TGT":tgt_code}
+            "TGT":tgt_code},
+    timeout=30
             )
     
 if response_url.status_code == 200:
@@ -181,7 +188,7 @@ realtime_generation_df = pd.DataFrame.from_records(response['items'])
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/dpp"
 
-if datetime.now().hour < 14:
+if datetime.now(turkey_timezone).hour < 14:
     response_url = requests.post(
         service_url,
         json={"startDate": str(month_start.isoformat()),
@@ -190,7 +197,8 @@ if datetime.now().hour < 14:
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code}
+                "TGT":tgt_code},
+        timeout=30
     )
 
 else:
@@ -202,7 +210,8 @@ else:
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code}
+                "TGT":tgt_code},
+        timeout=30
     )
 
 if response_url.status_code == 200:
@@ -226,7 +235,8 @@ if datetime.now(turkey_timezone).hour < 14:
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code}
+                "TGT":tgt_code},
+        timeout=30
     )
 
 else:
@@ -238,7 +248,8 @@ else:
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code}
+                "TGT":tgt_code},
+        timeout=30
     )
 
 if response_url.status_code == 200:
