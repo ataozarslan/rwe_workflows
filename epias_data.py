@@ -90,29 +90,6 @@ smf_df = pd.DataFrame.from_records(response['items']).drop(columns='hour')
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
-service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/bpm/data/system-direction"
-
-response_url = requests.post(
-    service_url,
-    json={"startDate": str((month_start - pd.Timedelta(days=1)).isoformat()),
-        "endDate": str((today_start - pd.Timedelta(days=1)).isoformat())},
-    headers={"Accept-Language":"en",
-            "Accept":"application/json",
-            "Content-Type":"application/json",
-            "TGT":tgt_code},
-    timeout=30
-    )
-
-if response_url.status_code == 200:
-    response = response_url.json()
-
-else:
-    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
-
-dgp_df = pd.DataFrame.from_records(response['items'])
-
-#---------------------------------------------------------------------------------------------------------------------------------
-
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/bpm/data/order-summary-up"
 
 response_url = requests.post(
@@ -271,7 +248,6 @@ engine = create_engine(connection_str)
 tables = {
     "ptf": ptf_df,
     "smf": smf_df,
-    "system_direction": dgp_df,
     "yal": yal_df,
     "yat": yat_df,
     "realtime_generation": realtime_generation_df,
