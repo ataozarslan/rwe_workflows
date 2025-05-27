@@ -5,9 +5,6 @@ import psycopg2
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta, timezone
 from dateutil.relativedelta import relativedelta
-from dotenv import load_dotenv
-
-load_dotenv()
 
 username = os.getenv('EPIAS_USERNAME')
 password = os.getenv('EPIAS_PASSWORD')
