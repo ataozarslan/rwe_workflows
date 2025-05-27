@@ -5,6 +5,9 @@ import psycopg2
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta, timezone
 from dateutil.relativedelta import relativedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 username = os.getenv('EPIAS_USERNAME')
 password = os.getenv('EPIAS_PASSWORD')
@@ -239,6 +242,30 @@ kgüp_v1_df = pd.DataFrame.from_records(response['items'])
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
+service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/aic"
+
+response_url = requests.post(
+    service_url,
+    json={"startDate": str(month_start.isoformat()),
+        "endDate": str(tomorrow_start.isoformat()),
+        "region": "TR1"},
+    headers={"Accept-Language":"en",
+            "Accept":"application/json",
+            "Content-Type":"application/json",
+            "TGT":tgt_code},
+            timeout=30
+            )
+    
+if response_url.status_code == 200:
+    response = response_url.json()
+    
+else:
+    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
+
+eak_df = pd.DataFrame.from_records(response['items'])
+
+#---------------------------------------------------------------------------------------------------------------------------------
+
 sb_user = os.getenv('SUPABASE_USER')
 sb_password = os.getenv('SUPABASE_PASSWORD')
 
@@ -252,7 +279,8 @@ tables = {
     "yat": yat_df,
     "realtime_generation": realtime_generation_df,
     "kgüp_v1": kgüp_v1_df,
-    "kgüp": kgüp_df
+    "kgüp": kgüp_df,
+    "eak": eak_df
 }
 
 with engine.begin() as conn:
