@@ -5,6 +5,9 @@ import psycopg2
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta, timezone
 from dateutil.relativedelta import relativedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 username = os.getenv('EPIAS_USERNAME')
 password = os.getenv('EPIAS_PASSWORD')
@@ -115,31 +118,6 @@ yal_df['yal_total'] = yal_df['yal0'] + yal_df['yal1'] + yal_df['yal2']
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
-service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/bpm/data/order-summary-down"
-
-response_url = requests.post(
-    service_url,
-    json={"startDate": str((month_start - pd.Timedelta(days=1)).isoformat()),
-        "endDate": str((today_start - pd.Timedelta(days=1)).isoformat())},
-    headers={"Accept-Language":"en",
-            "Accept":"application/json",
-            "Content-Type":"application/json",
-            "TGT":tgt_code},
-    timeout=30
-    )
-
-if response_url.status_code == 200:
-    response = response_url.json()
-
-else:
-    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
-
-yat_df = pd.DataFrame.from_records(response['items'])
-yat_df.columns = ['date', 'hour', 'yat0', 'yat1', 'yat2', 'yat_delivered', 'net']
-yat_df['yat_total'] = yat_df['yat0'] + yat_df['yat1'] + yat_df['yat2']
-
-#---------------------------------------------------------------------------------------------------------------------------------
-
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/realtime-generation"
 
 response_url = requests.post(
@@ -239,6 +217,31 @@ kgüp_v1_df = pd.DataFrame.from_records(response['items'])
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
+service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/data/market-message-system"
+
+response_url = requests.post(
+    service_url,
+    json={"startDate": '2025-04-02T00:00:00+03:00',
+        "endDate": str((datetime.now(turkey_timezone)).isoformat()),
+        "regionId": 1},
+    headers={"Accept-Language":"en",
+            "Accept":"application/json",
+            "Content-Type":"application/json",
+            "TGT":tgt_code},
+    timeout=30
+            )
+    
+if response_url.status_code == 200:
+    response = response_url.json()
+    
+else:
+    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
+
+message_df = pd.DataFrame.from_records(response['items'])
+message_df = message_df.iloc[:, :7].copy()
+
+#---------------------------------------------------------------------------------------------------------------------------------
+
 sb_user = os.getenv('SUPABASE_USER')
 sb_password = os.getenv('SUPABASE_PASSWORD')
 
@@ -249,23 +252,34 @@ tables = {
     "ptf": ptf_df,
     "smf": smf_df,
     "yal": yal_df,
-    "yat": yat_df,
     "realtime_generation": realtime_generation_df,
     "kgüp_v1": kgüp_v1_df,
-    "kgüp": kgüp_df
+    "kgüp": kgüp_df,
+    "market_messages": message_df
 }
 
 with engine.begin() as conn:
     for table_name, df in tables.items():
-        timestamps = df["date"].unique().tolist()
 
-        conn.execute(
-            text(f"""
-                DELETE FROM epias.{table_name}
-                WHERE date IN :timestamps
-            """),
-            {"timestamps": tuple(timestamps)}
-        )
+        if "date" in df.columns:
+            timestamps = df["date"].unique().tolist()
+            conn.execute(
+                text(f"""
+                    DELETE FROM epias.{table_name}
+                    WHERE date IN :timestamps
+                    """),
+                    {"timestamps": tuple(timestamps)}
+                )
+
+        elif "messageId" in df.columns:
+            message_ids = df["messageId"].unique().tolist()
+            conn.execute(
+                text(f"""
+                    DELETE FROM epias.{table_name}
+                    WHERE messageId IN :message_ids
+                    """),
+                    {"message_ids": tuple(message_ids)}
+                )
 
         df.to_sql(table_name, conn, if_exists='append', index=False, schema='epias', method='multi')
         print(f"{table_name} was uploaded!")
