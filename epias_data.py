@@ -235,7 +235,7 @@ else:
     print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
 
 message_df = pd.DataFrame.from_records(response['items'])
-message_df = message_df.iloc[:, :7].copy()
+message_df = message_df.iloc[:, :7].drop(columns='powerPlantName').copy()
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
