@@ -236,6 +236,7 @@ else:
 
 message_df = pd.DataFrame.from_records(response['items'])
 message_df = message_df.iloc[:, :7].drop(columns='powerPlantName').copy()
+message_df.drop_duplicates(inplace=True)
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
