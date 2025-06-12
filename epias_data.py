@@ -213,12 +213,12 @@ else:
 kgüp_v1_df = pd.DataFrame.from_records(response['items'])
 
 #---------------------------------------------------------------------------------------------------------------------------------
-
+#str(month_start.isoformat())
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/data/market-message-system"
 
 response_url = requests.post(
     service_url,
-    json={"startDate": str(month_start.isoformat()),
+    json={"startDate": '2025-04-02T00:00:00+03:00', 
         "endDate": str((datetime.now(turkey_timezone)).isoformat()),
         "regionId": 1},
     headers={"Accept-Language":"en",
@@ -258,29 +258,29 @@ tables = {
 
 with engine.begin() as conn:
     for table_name, df in tables.items():
-
+        
         if "date" in df.columns:
             timestamps = df["date"].unique().tolist()
             conn.execute(
                 text(f"""
                     DELETE FROM epias.{table_name}
                     WHERE date IN :timestamps
-                    """),
-                    {"timestamps": tuple(timestamps)}
-                )
+                """),
+                {"timestamps": tuple(timestamps)}
+            )
+            df.to_sql(table_name, conn, if_exists='append', index=False, schema='epias', method='multi')
+            print(f"{table_name} was uploaded!")
 
-        elif "messageId" in df.columns:
-            message_ids = df["messageId"].unique().tolist()
-            conn.execute(
-                text(f"""
-                    DELETE FROM epias.{table_name}
-                    WHERE messageId IN :message_ids
-                    """),
-                    {"message_ids": tuple(message_ids)}
-                )
+        else:
+            db_df = pd.read_sql_table(table_name, conn, schema='epias')
 
-        df.to_sql(table_name, conn, if_exists='append', index=False, schema='epias', method='multi')
-        print(f"{table_name} was uploaded!")
+            merged = df.merge(db_df.drop_duplicates(), how='left', indicator=True)
+            
+            new_rows = merged[merged['_merge'] == 'left_only'].drop(columns=['_merge'])
+
+            if not new_rows.empty:
+                new_rows.to_sql(table_name, conn, if_exists='append', index=False, schema='epias', method='multi')
+                print(f"{table_name} was uploaded!")
 
 print(f"All data was uploaded to DB at {datetime.now(turkey_timezone).isoformat()}!")
 print("Succeed!")
