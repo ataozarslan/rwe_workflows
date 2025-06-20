@@ -13,19 +13,16 @@ password = os.getenv('EPIAS_PASSWORD')
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
-# API giriş URL'si
 url = "https://giris.epias.com.tr/cas/v1/tickets"
 
-# İstek için gönderilecek JSON verisi
 data = {
     "username":username,
     "password":password}
 
-# POST isteği gönder
 response_tgt = requests.post(url, data=data, headers={"Content-Type": "application/x-www-form-urlencoded","Accept": "text/plain"}, timeout=30)
 
 # TGT yanıtını kontrol et
-if response_tgt.status_code == 201:  # 201 Created
+if response_tgt.status_code == 201:
     tgt_code = response_tgt.text
     print("TGT:", tgt_code)
 else:
@@ -33,15 +30,12 @@ else:
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
-# Türkiye saat dilimi (UTC+3)
 turkey_timezone = timezone(timedelta(hours=3))
 
-# Bugünün ve ayın başlangıç tarihleri
 today_start = datetime.now(turkey_timezone).replace(hour=0, minute=0, second=0, microsecond=0)
 month_start = today_start.replace(day=1)
 tomorrow_start = today_start + timedelta(days=1)
 
-# Sonuçları yazdır
 print("Ayın başlangıcı:", month_start.isoformat())
 print("Bugünün başlangıcı:", today_start.isoformat())
 print("Yarın başlangıcı:", tomorrow_start.isoformat())
@@ -50,7 +44,6 @@ print("Yarın başlangıcı:", tomorrow_start.isoformat())
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/supply-demand"
 
-# Tarih aralığı ayarı
 if datetime.now(turkey_timezone).hour >= 14:
     end_date = datetime.now(turkey_timezone) + timedelta(days=1)
     end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -58,7 +51,6 @@ else:
     end_date = datetime.now(turkey_timezone)
     end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
 
-# end_date'in o günün başlangıcı ve sonu
 day_start = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
 day_end = end_date.replace(hour=23, minute=0, second=0, microsecond=0)
 
@@ -132,3 +124,6 @@ with engine.begin() as conn:
     """), {"target_date": target_date})
     
     supply_demand_df.to_sql('supply_demand', conn, if_exists='append', index=False, schema='epias', method='multi')
+
+print(f"All data was uploaded to DB at {datetime.now(turkey_timezone).isoformat()}!")
+print("Succeed!")
