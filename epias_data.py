@@ -218,7 +218,7 @@ service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dat
 
 response_url = requests.post(
     service_url,
-    json={"startDate": '2025-04-02T00:00:00+03:00', 
+    json={"startDate": str(month_start.isoformat()), 
         "endDate": str((datetime.now(turkey_timezone)).isoformat()),
         "regionId": 1},
     headers={"Accept-Language":"en",
