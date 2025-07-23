@@ -16,6 +16,14 @@ data = {
     "username":username,
     "password":password}
 
+response_tgt = requests.post(url, data=data, headers={"Content-Type": "application/x-www-form-urlencoded","Accept": "text/plain"}, timeout=30)
+
+if response_tgt.status_code == 201:
+    tgt_code = response_tgt.text
+    print("TGT:", tgt_code)
+else:
+    print(f"Hata: {response_tgt.status_code}, Mesaj: {response_tgt.text}")
+
 def safe_post(url, json=None, headers=None, retries=3, timeout=60):
     for i in range(retries):
         try:
