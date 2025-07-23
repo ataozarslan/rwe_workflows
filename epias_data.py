@@ -1,3 +1,4 @@
+import time
 import requests
 import os
 import pandas as pd
@@ -15,13 +16,20 @@ data = {
     "username":username,
     "password":password}
 
-response_tgt = requests.post(url, data=data, headers={"Content-Type": "application/x-www-form-urlencoded","Accept": "text/plain"}, timeout=30)
-
-if response_tgt.status_code == 201:
-    tgt_code = response_tgt.text
-    print("TGT:", tgt_code)
-else:
-    print(f"Hata: {response_tgt.status_code}, Mesaj: {response_tgt.text}")
+def safe_post(url, json=None, headers=None, retries=3, timeout=60):
+    for i in range(retries):
+        try:
+            response = requests.post(url, json=json, headers=headers, timeout=timeout)
+            if response.status_code == 200:
+                return response
+            else:
+                print(f"[{i+1}/{retries}] HTTP {response.status_code} error, retrying...")
+        except requests.exceptions.ReadTimeout:
+            print(f"[{i+1}/{retries}] ReadTimeout error, retrying...")
+        except requests.exceptions.RequestException as e:
+            print(f"[{i+1}/{retries}] Other error: {e}, retrying...")
+        time.sleep(5)
+    raise Exception(f"Request to {url} failed after {retries} retries.")
 
 turkey_timezone = timezone(timedelta(hours=3))
 
@@ -34,7 +42,7 @@ tomorrow_start = today_start + timedelta(days=1)
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/mcp"
 
 if datetime.now(turkey_timezone).hour < 14:
-    response_url = requests.post(
+    response_url = requests.safe_post(
         service_url,
         json={"startDate": str(month_start.isoformat()),
             "endDate": str(today_start.isoformat())},
@@ -46,7 +54,7 @@ if datetime.now(turkey_timezone).hour < 14:
     )
 
 else:
-    response_url = requests.post(
+    response_url = requests.safe_post(
         service_url,
         json={"startDate": str(month_start.isoformat()),
             "endDate": str(tomorrow_start.isoformat())},
@@ -69,7 +77,7 @@ ptf_df = pd.DataFrame.from_records(response['items'])
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/bpm/data/system-marginal-price"
 
-response_url = requests.post(
+response_url = requests.safe_post(
     service_url,
     json={"startDate": str(month_start.isoformat()),
         "endDate": str(today_start.isoformat())},
@@ -92,7 +100,7 @@ smf_df = pd.DataFrame.from_records(response['items']).drop(columns='hour')
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/bpm/data/order-summary-up"
 
-response_url = requests.post(
+response_url = requests.safe_post(
     service_url,
     json={"startDate": str((month_start - pd.Timedelta(days=1)).isoformat()),
         "endDate": str((today_start - pd.Timedelta(days=1)).isoformat())},
@@ -117,7 +125,7 @@ yal_df['yal_total'] = yal_df['yal0'] + yal_df['yal1'] + yal_df['yal2']
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/realtime-generation"
 
-response_url = requests.post(
+response_url = requests.safe_post(
     service_url,
     json={"startDate": str(month_start.isoformat()),
         "endDate": str(tomorrow_start.isoformat())},
@@ -141,7 +149,7 @@ realtime_generation_df = pd.DataFrame.from_records(response['items'])
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/dpp"
 
 if datetime.now(turkey_timezone).hour < 14:
-    response_url = requests.post(
+    response_url = requests.safe_post(
         service_url,
         json={"startDate": str(month_start.isoformat()),
             "endDate": str(today_start.isoformat()),
@@ -154,7 +162,7 @@ if datetime.now(turkey_timezone).hour < 14:
     )
 
 else:
-    response_url = requests.post(
+    response_url = requests.safe_post(
         service_url,
         json={"startDate": str(month_start.isoformat()),
             "endDate": str(tomorrow_start.isoformat()),
@@ -179,7 +187,7 @@ kgüp_df = pd.DataFrame.from_records(response['items'])
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/dpp-first-version"
 
 if datetime.now(turkey_timezone).hour < 14:
-    response_url = requests.post(
+    response_url = requests.safe_post(
         service_url,
         json={"startDate": str(month_start.isoformat()),
             "endDate": str(today_start.isoformat()),
@@ -192,7 +200,7 @@ if datetime.now(turkey_timezone).hour < 14:
     )
 
 else:
-    response_url = requests.post(
+    response_url = requests.safe_post(
         service_url,
         json={"startDate": str(month_start.isoformat()),
             "endDate": str(tomorrow_start.isoformat()),
@@ -216,7 +224,7 @@ kgüp_v1_df = pd.DataFrame.from_records(response['items'])
 #str(month_start.isoformat())
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/data/market-message-system"
 
-response_url = requests.post(
+response_url = requests.safe_post(
     service_url,
     json={"startDate": str(month_start.isoformat()), 
         "endDate": str((datetime.now(turkey_timezone)).isoformat()),
