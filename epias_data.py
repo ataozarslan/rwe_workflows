@@ -295,6 +295,44 @@ reserve_df
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
+service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/ancillary-services/data/secondary-frequency-capacity-price"
+
+if datetime.now(turkey_timezone).hour < 16:
+    response_url = safe_post(
+        service_url,
+        json={"startDate": str(tomorrow_start.isoformat()),
+            "endDate": str(tomorrow_start.isoformat())},
+        headers={"Accept-Language":"en",
+                "Accept":"application/json",
+                "Content-Type":"application/json",
+                "TGT":tgt_code},
+        timeout=30
+    )
+
+else:
+    response_url = safe_post(
+        service_url,
+        json={"startDate": str(d2_start.isoformat()),
+            "endDate": str(d2_start.isoformat())},
+        headers={"Accept-Language":"en",
+                "Accept":"application/json",
+                "Content-Type":"application/json",
+                "TGT":tgt_code},
+        timeout=30
+    )
+
+if response_url.status_code == 200:
+    response = response_url.json()
+
+else:
+    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
+
+sfk_price_df = pd.DataFrame.from_records(response['items'])
+sfk_price_df.drop(columns='hour', inplace=True)
+sfk_price_df
+
+#---------------------------------------------------------------------------------------------------------------------------------
+
 sb_user = os.getenv('SUPABASE_USER')
 sb_password = os.getenv('SUPABASE_PASSWORD')
 
@@ -309,7 +347,8 @@ tables = {
     "kgüp_v1": kgüp_v1_df,
     "kgüp": kgüp_df,
     "market_messages": message_df,
-    "sfk_reserve": reserve_df
+    "sfk_reserve": reserve_df,
+    "sfk_price": sfk_price_df
 }
 
 with engine.begin() as conn:
