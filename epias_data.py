@@ -44,6 +44,7 @@ turkey_timezone = timezone(timedelta(hours=3))
 today_start = datetime.now(turkey_timezone).replace(hour=0, minute=0, second=0, microsecond=0)
 month_start = today_start.replace(day=1)
 tomorrow_start = today_start + timedelta(days=1)
+d2_start = today_start + timedelta(days=2)
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
@@ -229,7 +230,7 @@ else:
 kgüp_v1_df = pd.DataFrame.from_records(response['items'])
 
 #---------------------------------------------------------------------------------------------------------------------------------
-#str(month_start.isoformat())
+
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/data/market-message-system"
 
 response_url = safe_post(
@@ -256,6 +257,44 @@ message_df.drop_duplicates(inplace=True)
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
+service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/ancillary-services/data/secondary-frequency-capacity-amount"
+
+if datetime.now(turkey_timezone).hour < 16:
+    response_url = safe_post(
+        service_url,
+        json={"startDate": str(tomorrow_start.isoformat()),
+            "endDate": str(tomorrow_start.isoformat())},
+        headers={"Accept-Language":"en",
+                "Accept":"application/json",
+                "Content-Type":"application/json",
+                "TGT":tgt_code},
+        timeout=30
+    )
+
+else:
+    response_url = safe_post(
+        service_url,
+        json={"startDate": str(d2_start.isoformat()),
+            "endDate": str(d2_start.isoformat())},
+        headers={"Accept-Language":"en",
+                "Accept":"application/json",
+                "Content-Type":"application/json",
+                "TGT":tgt_code},
+        timeout=30
+    )
+
+if response_url.status_code == 200:
+    response = response_url.json()
+
+else:
+    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
+
+reserve_df = pd.DataFrame.from_records(response['items'])
+reserve_df.drop(columns='hour', inplace=True)
+reserve_df
+
+#---------------------------------------------------------------------------------------------------------------------------------
+
 sb_user = os.getenv('SUPABASE_USER')
 sb_password = os.getenv('SUPABASE_PASSWORD')
 
@@ -269,7 +308,8 @@ tables = {
     "realtime_generation": realtime_generation_df,
     "kgüp_v1": kgüp_v1_df,
     "kgüp": kgüp_df,
-    "market_messages": message_df
+    "market_messages": message_df,
+    "sfk_reserve": reserve_df
 }
 
 with engine.begin() as conn:
