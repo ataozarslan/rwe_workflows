@@ -347,8 +347,8 @@ tables = {
     "kgüp_v1": kgüp_v1_df,
     "kgüp": kgüp_df,
     "market_messages": message_df,
-    "sfk_reserve": reserve_df,
-    "sfk_price": sfk_price_df
+    "sfc_reserve": reserve_df,
+    "sfc_price": sfk_price_df
 }
 
 with engine.begin() as conn:
