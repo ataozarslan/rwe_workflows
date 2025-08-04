@@ -290,7 +290,7 @@ else:
     print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
 
 reserve_df = pd.DataFrame.from_records(response['items'])
-reserve_df.drop(columns='hour', inplace=True)
+reserve_df = reserve_df.loc[:,['date','amount']].copy()
 reserve_df
 
 #---------------------------------------------------------------------------------------------------------------------------------
@@ -328,7 +328,7 @@ else:
     print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
 
 sfk_price_df = pd.DataFrame.from_records(response['items'])
-sfk_price_df.drop(columns='hour', inplace=True)
+sfk_price_df = sfk_price_df.loc[:,['date','price']].copy()
 sfk_price_df
 
 #---------------------------------------------------------------------------------------------------------------------------------
