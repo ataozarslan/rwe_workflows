@@ -259,29 +259,16 @@ message_df.drop_duplicates(inplace=True)
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/ancillary-services/data/secondary-frequency-capacity-amount"
 
-if datetime.now(turkey_timezone).hour < 10:
-    response_url = safe_post(
-        service_url,
-        json={"startDate": str(tomorrow_start.isoformat()),
-            "endDate": str(tomorrow_start.isoformat())},
-        headers={"Accept-Language":"en",
-                "Accept":"application/json",
-                "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
-    )
-
-else:
-    response_url = safe_post(
-        service_url,
-        json={"startDate": str(d2_start.isoformat()),
-            "endDate": str(d2_start.isoformat())},
-        headers={"Accept-Language":"en",
-                "Accept":"application/json",
-                "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
-    )
+response_url = safe_post(
+    service_url,
+    json={"startDate": str(tomorrow_start.isoformat()),
+        "endDate": str(tomorrow_start.isoformat())},
+    headers={"Accept-Language":"en",
+            "Accept":"application/json",
+            "Content-Type":"application/json",
+            "TGT":tgt_code},
+    timeout=30
+)
 
 if response_url.status_code == 200:
     response = response_url.json()
@@ -289,37 +276,24 @@ if response_url.status_code == 200:
 else:
     print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
 
-reserve_df = pd.DataFrame.from_records(response['items'])
-reserve_df = reserve_df.loc[:,['date','amount']].copy()
-reserve_df
+sfc_reserve_df = pd.DataFrame.from_records(response['items'])
+sfc_reserve_df = sfc_reserve_df.loc[:,['date','amount']].copy()
+sfc_reserve_df
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/ancillary-services/data/secondary-frequency-capacity-price"
 
-if datetime.now(turkey_timezone).hour < 10:
-    response_url = safe_post(
-        service_url,
-        json={"startDate": str(tomorrow_start.isoformat()),
-            "endDate": str(tomorrow_start.isoformat())},
-        headers={"Accept-Language":"en",
-                "Accept":"application/json",
-                "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
-    )
-
-else:
-    response_url = safe_post(
-        service_url,
-        json={"startDate": str(d2_start.isoformat()),
-            "endDate": str(d2_start.isoformat())},
-        headers={"Accept-Language":"en",
-                "Accept":"application/json",
-                "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
-    )
+response_url = safe_post(
+    service_url,
+    json={"startDate": str(tomorrow_start.isoformat()),
+        "endDate": str(tomorrow_start.isoformat())},
+    headers={"Accept-Language":"en",
+            "Accept":"application/json",
+            "Content-Type":"application/json",
+            "TGT":tgt_code},
+    timeout=30
+)
 
 if response_url.status_code == 200:
     response = response_url.json()
@@ -327,9 +301,9 @@ if response_url.status_code == 200:
 else:
     print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
 
-sfk_price_df = pd.DataFrame.from_records(response['items'])
-sfk_price_df = sfk_price_df.loc[:,['date','price']].copy()
-sfk_price_df
+sfc_price_df = pd.DataFrame.from_records(response['items'])
+sfc_price_df = sfc_price_df.loc[:,['date','price']].copy()
+sfc_price_df
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
@@ -347,8 +321,8 @@ tables = {
     "kgüp_v1": kgüp_v1_df,
     "kgüp": kgüp_df,
     "market_messages": message_df,
-    "sfc_reserve": reserve_df,
-    "sfc_price": sfk_price_df
+    "sfc_reserve": sfc_reserve_df,
+    "sfc_price": sfc_price_df
 }
 
 with engine.begin() as conn:
