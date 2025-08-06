@@ -259,7 +259,7 @@ message_df.drop_duplicates(inplace=True)
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/ancillary-services/data/secondary-frequency-capacity-amount"
 
-if datetime.now(turkey_timezone).hour < 16:
+if datetime.now(turkey_timezone).hour < 10:
     response_url = safe_post(
         service_url,
         json={"startDate": str(tomorrow_start.isoformat()),
@@ -297,7 +297,7 @@ reserve_df
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/ancillary-services/data/secondary-frequency-capacity-price"
 
-if datetime.now(turkey_timezone).hour < 16:
+if datetime.now(turkey_timezone).hour < 10:
     response_url = safe_post(
         service_url,
         json={"startDate": str(tomorrow_start.isoformat()),
