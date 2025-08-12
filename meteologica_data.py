@@ -36,6 +36,64 @@ turkey_timezone = timezone(timedelta(hours=3))
 try:
 
     response = requests.get(
+        url=f"https://api-markets.meteologica.com/api/v1/contents/4687/historical_data/{current_year}/{current_month}",
+        params={"token": response_data.get("token")})
+
+    zip_filename = 'historical_data_price.zip'
+    with open(zip_filename, 'wb') as file:
+        file.write(response.content)
+
+    extract_dir = f"historical_data_price"
+    shutil.unpack_archive(zip_filename, extract_dir)
+    print(f"{zip_filename} klasöre çıkarıldı: {extract_dir}")
+
+    unlicensed_solarpv_data_files = [file for file in os.listdir('historical_data_price') if 'post' not in file]
+
+    data = []
+    other_data = []
+
+    for file in unlicensed_solarpv_data_files:
+        df = pd.read_json(f'historical_data_price/{file}')
+        data.append(pd.DataFrame(list(df['data'].values)))
+        other_data.append(df.drop(columns='data'))
+
+    data = pd.concat(data, ignore_index=True)
+    other_data = pd.concat(other_data, ignore_index=True)
+    final_data = pd.concat([data, other_data], axis=1)
+    final_data.drop(columns=['UTC offset from (UTC+/-hhmm)', 'UTC offset to (UTC+/-hhmm)', 'content_name', 'content_id', 'timezone', 'unit'], inplace=True)
+
+except:
+
+    response = requests.get(
+        url=f"https://api-markets.meteologica.com/api/v1/contents/4687/data",
+        params={"token": response_data.get("token")})
+    
+    data = pd.DataFrame(response.json()['data'])
+    other_data = pd.DataFrame(response.json()).drop(columns='data')
+    final_data = pd.concat([data, other_data], axis=1)
+    final_data.drop(columns=['UTC offset from (UTC+/-hhmm)', 'UTC offset to (UTC+/-hhmm)', 'content_name', 'content_id', 'timezone', 'unit'], inplace=True)
+    
+finally:
+
+    if os.path.exists(zip_filename):
+        os.remove(zip_filename)
+        print(f"{zip_filename} silindi.")
+
+    if os.path.exists(extract_dir):
+        shutil.rmtree(extract_dir)
+        print(f"{extract_dir} silindi.")
+
+final_data.rename(columns={col: f"price_{col}" for col in final_data.columns[2:]}, inplace=True)
+last_updated = final_data.groupby(['From yyyy-mm-dd hh:mm'], as_index=False)['price_update_id'].max()
+price_updated_data = pd.merge(last_updated, final_data, on=['From yyyy-mm-dd hh:mm', 'price_update_id'])
+price_updated_data['price_forecast'] = price_updated_data['price_forecast'].astype(float)
+price_updated_data.drop(columns='price_update_id', inplace=True)
+
+#---------------------------------------------------------------------------------------------------------------------------------
+
+try:
+
+    response = requests.get(
         url=f"https://api-markets.meteologica.com/api/v1/contents/1430/historical_data/{current_year}/{current_month}", # 1444
         params={"token": response_data.get("token")})
 
@@ -403,6 +461,7 @@ connection_str = f"postgresql+psycopg2://{sb_user}:{sb_password}@aws-0-us-east-2
 engine = create_engine(connection_str)
 
 tables = {
+    "price": price_updated_data,
     "unlicensed_solar": unlicensed_updated_data,
     "licensed_solar": licensed_updated_data,
     "wind": wind_updated_data,
@@ -413,8 +472,6 @@ tables = {
 
 with engine.begin() as conn:
     for table_name, df in tables.items():
-        df["From yyyy-mm-dd hh:mm"]  = pd.to_datetime(df["From yyyy-mm-dd hh:mm"])
-        df["From yyyy-mm-dd hh:mm"]  = df["From yyyy-mm-dd hh:mm"].astype(str)
         df.columns = df.columns.str.replace(' ','-').str.replace(':','-')
         timestamps = df["From-yyyy-mm-dd-hh-mm"].unique().tolist()
 
@@ -427,7 +484,6 @@ with engine.begin() as conn:
         )
 
         df.to_sql(table_name, conn, if_exists='append', index=False, schema='meteologica', method='multi')
-        print(f"{table_name} was uploaded!")
 
-print(f"All data was uploaded to DB at {datetime.now(turkey_timezone).isoformat()}!")
+print(f"{datetime.now(turkey_timezone).isoformat()} data was uploaded to DB!")
 print("Succeed!")
