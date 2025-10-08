@@ -193,44 +193,6 @@ kgüp_df = pd.DataFrame.from_records(response['items'])
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
-service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/dpp-first-version"
-
-if datetime.now(turkey_timezone).hour < 14:
-    response_url = safe_post(
-        service_url,
-        json={"startDate": str(month_start.isoformat()),
-            "endDate": str(today_start.isoformat()),
-            "region":"TR1"},
-        headers={"Accept-Language":"en",
-                "Accept":"application/json",
-                "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
-    )
-
-else:
-    response_url = safe_post(
-        service_url,
-        json={"startDate": str(month_start.isoformat()),
-            "endDate": str(tomorrow_start.isoformat()),
-            "region":"TR1"},
-        headers={"Accept-Language":"en",
-                "Accept":"application/json",
-                "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
-    )
-
-if response_url.status_code == 200:
-    response = response_url.json()
-
-else:
-    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
-
-kgüp_v1_df = pd.DataFrame.from_records(response['items'])
-
-#---------------------------------------------------------------------------------------------------------------------------------
-
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/data/market-message-system"
 
 response_url = safe_post(
@@ -318,7 +280,6 @@ tables = {
     "smf": smf_df,
     "yal": yal_df,
     "realtime_generation": realtime_generation_df,
-    "kgüp_v1": kgüp_v1_df,
     "kgüp": kgüp_df,
     "market_messages": message_df,
     "sfc_reserve": sfc_reserve_df,
