@@ -1,4 +1,4 @@
-name: Daily Meteorological Data Fetch
+name: Daily Meteostat Data Fetch
 
 on:
   schedule:
