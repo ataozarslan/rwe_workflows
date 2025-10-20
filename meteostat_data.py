@@ -4,9 +4,6 @@ import psycopg2
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta, timezone
 from meteostat import Point, Hourly
-from dotenv import load_dotenv
-
-load_dotenv()
 
 sb_user = os.getenv('SUPABASE_USER')
 sb_password = os.getenv('SUPABASE_PASSWORD')
