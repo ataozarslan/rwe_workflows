@@ -4,4 +4,4 @@ requests==2.31.0
 psycopg2==2.9.10
 sqlalchemy==2.0.25
 python-dateutil==2.8.2
-meteostat==1.6.5
+openmeteo_requests==1.7.3
