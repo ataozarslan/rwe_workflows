@@ -1,4 +1,4 @@
-name: Daily Meteostat Data Fetch
+name: Daily Open-Meteo Data Fetch
 
 on:
   schedule:
@@ -25,7 +25,7 @@ jobs:
 
     - name: Run script
       run: |
-        python meteostat_data.py
+        python meteo_data.py
       env:
         SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
         SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
