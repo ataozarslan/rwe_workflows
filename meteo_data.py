@@ -58,10 +58,16 @@ for city, coords in cities.items():
 
     df = pd.DataFrame(hourly_data)
     df.set_index("date", inplace=True)
-    df = df.applymap(lambda x: float(f"{x:.1f}"))
+
+    num_cols = df.select_dtypes(include="number").columns
+    for col in num_cols:
+        df[col] = df[col].map(lambda x: float(f"{x:.1f}"))
+
     city_dataframes[city] = df
 
     time.sleep(0.3)
+
+print("Data fetching completed.")
 
 temperature_df = pd.concat([df["temperature_2m"].rename(city) for city, df in city_dataframes.items()], axis=1)
 humidity_df = pd.concat([df["relative_humidity_2m"].rename(city) for city, df in city_dataframes.items()], axis=1)
@@ -88,6 +94,8 @@ tables = {
 for df in tables.values():
     df.index = df.index.tz_localize(None)
     df.index = df.index.astype(str)
+
+print("Data processing completed.")
 
 with engine.begin() as conn:
 
