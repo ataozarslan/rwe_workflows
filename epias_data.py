@@ -42,7 +42,7 @@ def safe_post(url, json=None, headers=None, retries=3, timeout=60):
 turkey_timezone = timezone(timedelta(hours=3))
 
 today_start = datetime.now(turkey_timezone).replace(hour=0, minute=0, second=0, microsecond=0)
-month_start = today_start.replace(day=1)
+last_week_start = today_start - timedelta(days=7)
 tomorrow_start = today_start + timedelta(days=1)
 d2_start = today_start + timedelta(days=2)
 
@@ -53,7 +53,7 @@ service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam
 if datetime.now(turkey_timezone).hour < 14:
     response_url = safe_post(
         service_url,
-        json={"startDate": str(month_start.isoformat()),
+        json={"startDate": str(last_week_start.isoformat()),
             "endDate": str(today_start.isoformat())},
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
@@ -65,7 +65,7 @@ if datetime.now(turkey_timezone).hour < 14:
 else:
     response_url = safe_post(
         service_url,
-        json={"startDate": str(month_start.isoformat()),
+        json={"startDate": str(last_week_start.isoformat()),
             "endDate": str(tomorrow_start.isoformat())},
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
@@ -88,7 +88,7 @@ service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/bpm
 
 response_url = safe_post(
     service_url,
-    json={"startDate": str(month_start.isoformat()),
+    json={"startDate": str(last_week_start.isoformat()),
         "endDate": str(today_start.isoformat())},
     headers={"Accept-Language":"en",
             "Accept":"application/json",
@@ -111,7 +111,7 @@ service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/bpm
 
 response_url = safe_post(
     service_url,
-    json={"startDate": str((month_start - pd.Timedelta(days=1)).isoformat()),
+    json={"startDate": str((last_week_start - pd.Timedelta(days=1)).isoformat()),
         "endDate": str((today_start - pd.Timedelta(days=1)).isoformat())},
     headers={"Accept-Language":"en",
             "Accept":"application/json",
@@ -136,7 +136,7 @@ service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/
 
 response_url = safe_post(
     service_url,
-    json={"startDate": str(month_start.isoformat()),
+    json={"startDate": str(last_week_start.isoformat()),
         "endDate": str(tomorrow_start.isoformat())},
     headers={"Accept-Language":"en",
             "Accept":"application/json",
@@ -160,7 +160,7 @@ service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/
 if datetime.now(turkey_timezone).hour < 14:
     response_url = safe_post(
         service_url,
-        json={"startDate": str(month_start.isoformat()),
+        json={"startDate": str(last_week_start.isoformat()),
             "endDate": str(today_start.isoformat()),
             "region":"TR1"},
         headers={"Accept-Language":"en",
@@ -173,7 +173,7 @@ if datetime.now(turkey_timezone).hour < 14:
 else:
     response_url = safe_post(
         service_url,
-        json={"startDate": str(month_start.isoformat()),
+        json={"startDate": str(last_week_start.isoformat()),
             "endDate": str(tomorrow_start.isoformat()),
             "region":"TR1"},
         headers={"Accept-Language":"en",
@@ -197,7 +197,7 @@ service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dat
 
 response_url = safe_post(
     service_url,
-    json={"startDate": str(month_start.isoformat()), 
+    json={"startDate": str(last_week_start.isoformat()), 
         "endDate": str((datetime.now(turkey_timezone)).isoformat()),
         "regionId": 1},
     headers={"Accept-Language":"en",
@@ -240,7 +240,6 @@ else:
 
 sfc_reserve_df = pd.DataFrame.from_records(response['items'])
 sfc_reserve_df = sfc_reserve_df.loc[:,['date','amount']].copy()
-sfc_reserve_df
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
@@ -265,7 +264,6 @@ else:
 
 sfc_price_df = pd.DataFrame.from_records(response['items'])
 sfc_price_df = sfc_price_df.loc[:,['date','price']].copy()
-sfc_price_df
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
