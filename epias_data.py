@@ -221,15 +221,16 @@ message_df.drop_duplicates(inplace=True)
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/consumption/data/realtime-consumption"
 
-response_url = requests.post(
-    service_url,
-    json={"startDate": str(last_week_start.isoformat()),
-        "endDate": str(today_start.isoformat())},
-    headers={"Accept-Language":"en",
-            "Accept":"application/json",
-            "Content-Type":"application/json",
-            "TGT":tgt_code}
-            )
+response_url = safe_post(
+        service_url,
+        json={"startDate": str(last_week_start.isoformat()),
+            "endDate": str(today_start.isoformat())},
+        headers={"Accept-Language":"en",
+                "Accept":"application/json",
+                "Content-Type":"application/json",
+                "TGT":tgt_code},
+        timeout=30
+    )
     
 if response_url.status_code == 200:
     response = response_url.json()
