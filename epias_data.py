@@ -234,7 +234,6 @@ response_url = safe_post(
     
 if response_url.status_code == 200:
     response = response_url.json()
-    print(response)
     
 else:
     print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
