@@ -24,7 +24,7 @@ if response_tgt.status_code == 201:
 else:
     print(f"Hata: {response_tgt.status_code}, Mesaj: {response_tgt.text}")
 
-def safe_post(url, json=None, headers=None, retries=3, timeout=60):
+def safe_post(url, json=None, headers=None, retries=5, timeout=60):
     for i in range(retries):
         try:
             response = requests.post(url, json=json, headers=headers, timeout=timeout)
@@ -58,8 +58,7 @@ if datetime.now(turkey_timezone).hour < 14:
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
+                "TGT":tgt_code}
     )
 
 else:
@@ -70,8 +69,7 @@ else:
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
+                "TGT":tgt_code}
     )
 
 if response_url.status_code == 200:
@@ -93,9 +91,8 @@ response_url = safe_post(
     headers={"Accept-Language":"en",
             "Accept":"application/json",
             "Content-Type":"application/json",
-            "TGT":tgt_code},
-    timeout=30
-    )
+            "TGT":tgt_code}
+)
 
 if response_url.status_code == 200:
     response = response_url.json()
@@ -116,9 +113,8 @@ response_url = safe_post(
     headers={"Accept-Language":"en",
             "Accept":"application/json",
             "Content-Type":"application/json",
-            "TGT":tgt_code},
-    timeout=30
-    )
+            "TGT":tgt_code}
+)
 
 if response_url.status_code == 200:
     response = response_url.json()
@@ -141,9 +137,8 @@ response_url = safe_post(
     headers={"Accept-Language":"en",
             "Accept":"application/json",
             "Content-Type":"application/json",
-            "TGT":tgt_code},
-    timeout=30
-            )
+            "TGT":tgt_code}
+)
     
 if response_url.status_code == 200:
     response = response_url.json()
@@ -166,8 +161,7 @@ if datetime.now(turkey_timezone).hour < 14:
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
+                "TGT":tgt_code}
     )
 
 else:
@@ -179,8 +173,7 @@ else:
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
+                "TGT":tgt_code}
     )
 
 if response_url.status_code == 200:
@@ -203,9 +196,8 @@ response_url = safe_post(
     headers={"Accept-Language":"en",
             "Accept":"application/json",
             "Content-Type":"application/json",
-            "TGT":tgt_code},
-    timeout=30
-            )
+            "TGT":tgt_code}
+)
     
 if response_url.status_code == 200:
     response = response_url.json()
@@ -228,9 +220,8 @@ response_url = safe_post(
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
-    )
+                "TGT":tgt_code}
+)
     
 if response_url.status_code == 200:
     response = response_url.json()
@@ -251,8 +242,7 @@ response_url = safe_post(
     headers={"Accept-Language":"en",
             "Accept":"application/json",
             "Content-Type":"application/json",
-            "TGT":tgt_code},
-    timeout=30
+            "TGT":tgt_code}
 )
 
 if response_url.status_code == 200:
@@ -275,8 +265,7 @@ response_url = safe_post(
     headers={"Accept-Language":"en",
             "Accept":"application/json",
             "Content-Type":"application/json",
-            "TGT":tgt_code},
-    timeout=30
+            "TGT":tgt_code}
 )
 
 if response_url.status_code == 200:
