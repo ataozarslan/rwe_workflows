@@ -128,6 +128,59 @@ yal_df['yal_total'] = yal_df['yal0'] + yal_df['yal1'] + yal_df['yal2']
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
+service_urls = ["https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/price-independent-offer",
+                "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/amount-of-block-selling",
+                "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/submitted-sales-order-volume",
+                "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/clearing-quantity",
+                "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/matched-flexible-offer-quantity"]
+
+response_dict = {}
+
+for index, service_url in enumerate(service_urls):
+
+    if datetime.now(turkey_timezone).hour < 14:
+        response_url = safe_post(
+            service_url,
+            json={"startDate": str(last_week_start.isoformat()),
+                "endDate": str(today_start.isoformat())},
+            headers={"Accept-Language":"en",
+                    "Accept":"application/json",
+                    "Content-Type":"application/json",
+                    "TGT":tgt_code},
+            timeout=30
+        )
+
+    else:
+        response_url = safe_post(
+            service_url,
+            json={"startDate": str(last_week_start.isoformat()),
+                "endDate": str(tomorrow_start.isoformat())},
+            headers={"Accept-Language":"en",
+                    "Accept":"application/json",
+                    "Content-Type":"application/json",
+                    "TGT":tgt_code},
+            timeout=30
+        )
+
+    if response_url.status_code == 200:
+        response = response_url.json()
+
+    else:
+        print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
+
+    response_dict[f"Response_{index+1}"] = pd.DataFrame.from_records(response['items'])
+
+sales_offers_df = pd.merge(pd.merge(pd.merge(pd.merge(response_dict['Response_1'].drop(columns='hour'), response_dict['Response_2'].drop(columns='time'), on='date'),
+                                response_dict['Response_3'].drop(columns='hour'), on='date'),
+                       response_dict['Response_4'].drop(columns=['hour','matchedBids']), on='date'),
+              response_dict['Response_5'].drop(columns=['hour','matchedFlexibleBuyingOfferQuantity']), on='date')
+sales_offers_df.columns = ['date', 'priceIndependentSales', 'matchedBlockSales', 'unMatchedBlockSales', 'totalSalesOffer', 'totalSalesMatchedOffer', 'matchedFlexibleSales']
+sales_offers_df['matchedHourlySales'] = sales_offers_df['totalSalesMatchedOffer'] - sales_offers_df['priceIndependentSales'] - sales_offers_df['matchedBlockSales'] - sales_offers_df['matchedFlexibleSales']
+sales_offers_df['unMatchedHourlySales'] = sales_offers_df['totalSalesOffer'] - sales_offers_df['totalSalesMatchedOffer'] - sales_offers_df['unMatchedBlockSales']
+sales_offers_df = sales_offers_df[['date','totalSalesOffer','totalSalesMatchedOffer','priceIndependentSales','unMatchedBlockSales','matchedBlockSales','unMatchedHourlySales','matchedHourlySales','matchedFlexibleSales']].copy()
+
+#---------------------------------------------------------------------------------------------------------------------------------
+
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/realtime-generation"
 
 response_url = safe_post(
@@ -291,6 +344,7 @@ tables = {
     "ptf": ptf_df,
     "smf": smf_df,
     "yal": yal_df,
+    "sales_offer": sales_offers_df,
     "realtime_generation": realtime_generation_df,
     "kgüp": kgüp_df,
     "market_messages": message_df,
