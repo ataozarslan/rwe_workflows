@@ -207,6 +207,8 @@ else:
 
 message_df = pd.DataFrame.from_records(response['items'])
 message_df = message_df.iloc[:, :7].drop(columns='powerPlantName').copy()
+message_df['caseStartDate'] = pd.to_datetime(message_df['caseStartDate']).dt.tz_localize(None)
+message_df['caseEndDate'] = pd.to_datetime(message_df['caseEndDate']).dt.tz_localize(None)
 message_df.drop_duplicates(inplace=True)
 
 #---------------------------------------------------------------------------------------------------------------------------------
