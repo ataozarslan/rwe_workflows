@@ -181,28 +181,6 @@ sales_offers_df = sales_offers_df[['date','totalSalesOffer','totalSalesMatchedOf
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
-service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/realtime-generation"
-
-response_url = safe_post(
-    service_url,
-    json={"startDate": str(last_week_start.isoformat()),
-        "endDate": str(tomorrow_start.isoformat())},
-    headers={"Accept-Language":"en",
-            "Accept":"application/json",
-            "Content-Type":"application/json",
-            "TGT":tgt_code}
-)
-    
-if response_url.status_code == 200:
-    response = response_url.json()
-    
-else:
-    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
-
-realtime_generation_df = pd.DataFrame.from_records(response['items'])
-
-#---------------------------------------------------------------------------------------------------------------------------------
-
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/dpp"
 
 if datetime.now(turkey_timezone).hour < 14:
@@ -236,55 +214,6 @@ else:
     print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
 
 kgüp_df = pd.DataFrame.from_records(response['items'])
-
-#---------------------------------------------------------------------------------------------------------------------------------
-
-service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/data/market-message-system"
-
-response_url = safe_post(
-    service_url,
-    json={"startDate": str(last_week_start.isoformat()), 
-        "endDate": str((datetime.now(turkey_timezone)).isoformat()),
-        "regionId": 1},
-    headers={"Accept-Language":"en",
-            "Accept":"application/json",
-            "Content-Type":"application/json",
-            "TGT":tgt_code}
-)
-    
-if response_url.status_code == 200:
-    response = response_url.json()
-    
-else:
-    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
-
-message_df = pd.DataFrame.from_records(response['items'])
-message_df = message_df.iloc[:, :7].drop(columns='powerPlantName').copy()
-message_df['caseStartDate'] = pd.to_datetime(message_df['caseStartDate']).dt.tz_localize(None)
-message_df['caseEndDate'] = pd.to_datetime(message_df['caseEndDate']).dt.tz_localize(None)
-message_df.drop_duplicates(inplace=True)
-
-#---------------------------------------------------------------------------------------------------------------------------------
-
-service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/consumption/data/realtime-consumption"
-
-response_url = safe_post(
-        service_url,
-        json={"startDate": str(last_week_start.isoformat()),
-            "endDate": str(today_start.isoformat())},
-        headers={"Accept-Language":"en",
-                "Accept":"application/json",
-                "Content-Type":"application/json",
-                "TGT":tgt_code}
-)
-    
-if response_url.status_code == 200:
-    response = response_url.json()
-    
-else:
-    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
-
-consumption_df = pd.DataFrame.from_records(response['items'])
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
@@ -345,10 +274,7 @@ tables = {
     "smf": smf_df,
     "yal": yal_df,
     "sales_offer": sales_offers_df,
-    "realtime_generation": realtime_generation_df,
     "kgüp": kgüp_df,
-    "market_messages": message_df,
-    "realtime_consumption": consumption_df,
     "sfc_reserve": sfc_reserve_df,
     "sfc_price": sfc_price_df
 }
