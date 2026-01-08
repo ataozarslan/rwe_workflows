@@ -126,7 +126,7 @@ engine = create_engine(connection_str)
 
 tables = {
     "realtime_generation": realtime_generation_df,
-    "realtime_consumption": consumption_df
+    "realtime_consumption": consumption_df,
     "market_messages": message_df
 }
 
