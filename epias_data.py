@@ -82,28 +82,6 @@ ptf_df = pd.DataFrame.from_records(response['items'])
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
-service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/bpm/data/system-marginal-price"
-
-response_url = safe_post(
-    service_url,
-    json={"startDate": str(last_week_start.isoformat()),
-        "endDate": str(today_start.isoformat())},
-    headers={"Accept-Language":"en",
-            "Accept":"application/json",
-            "Content-Type":"application/json",
-            "TGT":tgt_code}
-)
-
-if response_url.status_code == 200:
-    response = response_url.json()
-
-else:
-    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
-
-smf_df = pd.DataFrame.from_records(response['items']).drop(columns='hour')
-
-#---------------------------------------------------------------------------------------------------------------------------------
-
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/bpm/data/order-summary-up"
 
 response_url = safe_post(
@@ -271,7 +249,6 @@ engine = create_engine(connection_str)
 
 tables = {
     "ptf": ptf_df,
-    "smf": smf_df,
     "yal": yal_df,
     "sales_offer": sales_offers_df,
     "kgüp": kgüp_df,
