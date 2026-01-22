@@ -47,7 +47,7 @@ response = requests.get(
 price_updated_data = response.json()['data']
 price_updated_data = pd.DataFrame(price_updated_data)[['From yyyy-mm-dd hh:mm', 'Bottom', 'Average', 'Top']]
 price_updated_data.columns = ['date', 'min_price', 'avg_price', 'max_price']
-price_updated_data['date'] = pd.to_datetime(price_updated_data['date'], format='%Y-%m-%d %H:%M:%S')
+price_updated_data['date'] = pd.to_datetime(price_updated_data['date'])
 
 if datetime.now(turkey_timezone).hour > 9 and datetime.now(turkey_timezone).hour < 12:
     price_updated_data = price_updated_data[price_updated_data["date"].dt.date == (datetime.now(turkey_timezone).date() + timedelta(days=1))]
