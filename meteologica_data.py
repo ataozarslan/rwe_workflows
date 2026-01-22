@@ -4,9 +4,6 @@ import pandas as pd
 import psycopg2
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta, timezone
-from dotenv import load_dotenv
-
-load_dotenv()
 
 username = os.getenv('XTRADERS_USERNAME')
 password = os.getenv('XTRADERS_PASSWORD')
