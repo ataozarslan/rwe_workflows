@@ -2,9 +2,9 @@ name: Daily EPIAS Data Fetch
 
 on:
   schedule:
-    - cron: '5 10 * * *'
+    - cron: '0 10 * * *'
     - cron: '5 13 * * *'
-    - cron: '5 19 * * *'
+    - cron: '0 19 * * *'
   workflow_dispatch:
 
 jobs:
