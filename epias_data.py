@@ -48,28 +48,28 @@ d2_start = today_start + timedelta(days=2)
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
-service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/mcp"
+service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/interim-mcp"
 
-if datetime.now(turkey_timezone).hour < 14:
+if datetime.now(turkey_timezone).hour < 13:
     response_url = safe_post(
         service_url,
-        json={"startDate": str(last_week_start.isoformat()),
-            "endDate": str(today_start.isoformat())},
+        json={"startDate": str(today_start.isoformat())},
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code}
+                "TGT":tgt_code},
+        timeout=30
     )
 
 else:
     response_url = safe_post(
         service_url,
-        json={"startDate": str(last_week_start.isoformat()),
-            "endDate": str(tomorrow_start.isoformat())},
+        json={"startDate": str(tomorrow_start.isoformat())},
         headers={"Accept-Language":"en",
                 "Accept":"application/json",
                 "Content-Type":"application/json",
-                "TGT":tgt_code}
+                "TGT":tgt_code},
+        timeout=30
     )
 
 if response_url.status_code == 200:
@@ -79,6 +79,7 @@ else:
     print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
 
 ptf_df = pd.DataFrame.from_records(response['items'])
+ptf_df.columns = ['date', 'hour', 'price']
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
