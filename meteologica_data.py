@@ -2,7 +2,6 @@ import requests
 import os
 import pandas as pd
 import psycopg2
-import datetime
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta, timezone
 
