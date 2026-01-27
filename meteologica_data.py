@@ -49,7 +49,7 @@ price_updated_data = pd.DataFrame(price_updated_data)[['From yyyy-mm-dd hh:mm', 
 price_updated_data.columns = ['date', 'min_price', 'avg_price', 'max_price']
 price_updated_data['date'] = pd.to_datetime(price_updated_data['date'])
 
-if datetime.now(turkey_timezone).hour > 9 and datetime.now(turkey_timezone).hour < 12:
+if datetime.now(turkey_timezone).hour >= 8 and datetime.now(turkey_timezone).hour < 12:
     price_updated_data = price_updated_data[price_updated_data["date"].dt.date == (datetime.now(turkey_timezone).date() + timedelta(days=1))]
 
     try:
