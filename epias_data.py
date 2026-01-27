@@ -48,41 +48,6 @@ d2_start = today_start + timedelta(days=2)
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
-service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/dam/data/interim-mcp"
-
-if datetime.now(turkey_timezone).hour < 13:
-    response_url = safe_post(
-        service_url,
-        json={"startDate": str(today_start.isoformat())},
-        headers={"Accept-Language":"en",
-                "Accept":"application/json",
-                "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
-    )
-
-else:
-    response_url = safe_post(
-        service_url,
-        json={"startDate": str(tomorrow_start.isoformat())},
-        headers={"Accept-Language":"en",
-                "Accept":"application/json",
-                "Content-Type":"application/json",
-                "TGT":tgt_code},
-        timeout=30
-    )
-
-if response_url.status_code == 200:
-    response = response_url.json()
-
-else:
-    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
-
-ptf_df = pd.DataFrame.from_records(response['items'])
-ptf_df.columns = ['date', 'hour', 'price']
-
-#---------------------------------------------------------------------------------------------------------------------------------
-
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/bpm/data/order-summary-up"
 
 response_url = safe_post(
@@ -249,7 +214,6 @@ connection_str = f"postgresql+psycopg2://{sb_user}:{sb_password}@aws-0-us-east-2
 engine = create_engine(connection_str)
 
 tables = {
-    "ptf": ptf_df,
     "yal": yal_df,
     "sales_offer": sales_offers_df,
     "kgüp": kgüp_df,
