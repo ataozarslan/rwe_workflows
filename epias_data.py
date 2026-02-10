@@ -161,6 +161,31 @@ kgüp_df = pd.DataFrame.from_records(response['items'])
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
+service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/generation/data/aic"
+
+response_url = safe_post(
+    service_url,
+    json={"startDate": str(today_start.isoformat()),
+        "endDate": str(tomorrow_start.isoformat()),
+         "region": "TR1"},
+    headers={"Accept-Language":"en",
+            "Accept":"application/json",
+            "Content-Type":"application/json",
+            "TGT":tgt_code}
+)
+
+if response_url.status_code == 200:
+    response = response_url.json()
+
+else:
+    print(f"Hata: {response_url.status_code}, Mesaj: {response_url.text}")
+
+eak_df = pd.DataFrame.from_records(response['items'])
+eak_df.columns = ['date', 'hour', 'total', 'naturalGas', 'wind', 'lignite', 'blackCoal', 'importCoal', 'fueloil',
+                  'geothermal', 'dammedHydro', 'naphta', 'biomass', 'river', 'sun', 'other']
+
+#---------------------------------------------------------------------------------------------------------------------------------
+
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/ancillary-services/data/secondary-frequency-capacity-amount"
 
 response_url = safe_post(
@@ -217,6 +242,7 @@ tables = {
     "yal": yal_df,
     "sales_offer": sales_offers_df,
     "kgüp": kgüp_df,
+    "eak": eak_df,
     "sfc_reserve": sfc_reserve_df,
     "sfc_price": sfc_price_df
 }
