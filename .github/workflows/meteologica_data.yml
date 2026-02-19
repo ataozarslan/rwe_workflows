@@ -3,9 +3,8 @@ name: Daily Meteologica Data Fetch
 on:
   schedule:
     - cron: '0 21 * * *'  # UTC 21:00 = Türkiye saatiyle 00:00
-    - cron: '45 5 * * *'
+    - cron: '30 5 * * *'
     - cron: '50 9 * * *'
-    - cron: '0 17 * * *'
   workflow_dispatch:
 
 jobs:
