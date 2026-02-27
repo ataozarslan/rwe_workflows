@@ -38,25 +38,25 @@ print(f"Year: {current_year}, Month: {current_month}")
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
-# Price
+# Forecast
 response = requests.get(
   url = 'https://api-markets.meteologica.com/api/v1/contents/4688/data',
   params = {"token": response_data.get("token")}
 )
 
-price_updated_data = response.json()['data']
-price_updated_data = pd.DataFrame(price_updated_data)[['From yyyy-mm-dd hh:mm', 'Bottom', 'Average', 'Top']]
-price_updated_data.columns = ['date', 'min_price', 'avg_price', 'max_price']
-price_updated_data['date'] = pd.to_datetime(price_updated_data['date'])
+forecast_updated_data = response.json()['data']
+forecast_updated_data = pd.DataFrame(forecast_updated_data)[['From yyyy-mm-dd hh:mm', 'Bottom', 'Average', 'Top']]
+forecast_updated_data.columns = ['date', 'min_price', 'avg_price', 'max_price']
+forecast_updated_data['date'] = pd.to_datetime(forecast_updated_data['date'])
 
 if datetime.now(turkey_timezone).hour >= 8 and datetime.now(turkey_timezone).hour < 12:
-    price_updated_data = price_updated_data[price_updated_data["date"].dt.date == (datetime.now(turkey_timezone).date() + timedelta(days=1))]
+    forecast_updated_data = forecast_updated_data[forecast_updated_data["date"].dt.date == (datetime.now(turkey_timezone).date() + timedelta(days=1))]
 
     try:
 
         with engine.connect() as conn:
 
-            price_updated_data.to_sql('meteologica_forecast', conn, if_exists='append', index=False, schema='public', method='multi')
+            forecast_updated_data.to_sql('meteologica_forecast', conn, if_exists='append', index=False, schema='public', method='multi')
             print(f"price data was uploaded at {datetime.now(turkey_timezone).isoformat()}!")
 
     except:
@@ -64,18 +64,30 @@ if datetime.now(turkey_timezone).hour >= 8 and datetime.now(turkey_timezone).hou
         print(f"The D+1 forecasts has already loaded into database!")
 
 elif datetime.now(turkey_timezone).hour >= 13 and datetime.now(turkey_timezone).hour < 15:
-    price_updated_data = price_updated_data[price_updated_data["date"].dt.date == (datetime.now(turkey_timezone).date() + timedelta(days=2))]
+    forecast_updated_data = forecast_updated_data[forecast_updated_data["date"].dt.date == (datetime.now(turkey_timezone).date() + timedelta(days=2))]
 
     try:
 
         with engine.connect() as conn:
 
-            price_updated_data.to_sql('meteologica_forecast_d+2', conn, if_exists='append', index=False, schema='public', method='multi')
+            forecast_updated_data.to_sql('meteologica_forecast_d+2', conn, if_exists='append', index=False, schema='public', method='multi')
             print(f"price data was uploaded at {datetime.now(turkey_timezone).isoformat()}!")
 
     except:
 
         print(f"The D+2 forecasts has already loaded into database!")
+        
+#---------------------------------------------------------------------------------------------------------------------------------
+
+# Price
+response = requests.get(
+  url = 'https://api-markets.meteologica.com/api/v1/contents/4687/data',
+  params = {"token": response_data.get("token")}
+)
+
+price_updated_data = pd.DataFrame(response.json()['data'])
+price_updated_data.drop(columns=['UTC offset from (UTC+/-hhmm)', 'UTC offset to (UTC+/-hhmm)'], inplace=True)
+price_updated_data.columns = ['From-yyyy-mm-dd-hh-mm', 'To-yyyy-mm-dd-hh-mm', 'price_forecast']
 
 #---------------------------------------------------------------------------------------------------------------------------------
 
@@ -168,6 +180,7 @@ for column in demand_updated_data.columns[2:]:
 
 # Database Upload
 tables = {
+    "price": price_updated_data,
     "unlicensed_solar": unlicensed_solar_updated_data,
     "licensed_solar": licensed_solar_updated_data,
     "wind": wind_updated_data,
