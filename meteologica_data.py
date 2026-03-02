@@ -63,7 +63,7 @@ if datetime.now(turkey_timezone).hour >= 8 and datetime.now(turkey_timezone).hou
 
         print(f"The D+1 forecasts has already loaded into database!")
 
-elif datetime.now(turkey_timezone).hour >= 13 and datetime.now(turkey_timezone).hour < 15:
+elif datetime.now(turkey_timezone).hour >= 12 and datetime.now(turkey_timezone).hour < 15:
     forecast_updated_data = forecast_updated_data[forecast_updated_data["date"].dt.date == (datetime.now(turkey_timezone).date() + timedelta(days=2))]
 
     try:
