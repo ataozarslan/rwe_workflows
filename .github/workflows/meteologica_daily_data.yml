@@ -1,0 +1,32 @@
+name: Daily Meteologica Historical Forecast Data Fetch
+
+on:
+  schedule:
+    - cron: '0 5 * * *'  # UTC 05:00 = Türkiye saatiyle 08:00
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run script
+      run: |
+        python meteologica_daily_data.py
+      env:
+        SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
+        SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
+        XTRADERS_USERNAME: ${{ secrets.XTRADERS_USERNAME }}
+        XTRADERS_PASSWORD: ${{ secrets.XTRADERS_PASSWORD }}
