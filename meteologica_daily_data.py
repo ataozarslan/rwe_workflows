@@ -6,18 +6,14 @@ import shutil
 from sqlalchemy import create_engine
 from datetime import datetime, timedelta, timezone
 
-epias_username = os.getenv('EPIAS_USERNAME')
-epias_password = os.getenv('EPIAS_PASSWORD')
-
+meteo_username = os.getenv('XTRADERS_USERNAME')
+meteo_password = os.getenv('XTRADERS_PASSWORD')
 
 db_user = os.getenv('SUPABASE_USER')
 db_password = os.getenv('SUPABASE_PASSWORD')
 
 connection_str = f"postgresql+psycopg2://{db_user}:{db_password}@aws-0-us-east-2.pooler.supabase.com:5432/postgres"
 engine = create_engine(connection_str)
-
-meteo_username = os.getenv('XTRADERS_USERNAME')
-meteo_password = os.getenv('XTRADERS_PASSWORD')
 
 url = "https://api-markets.meteologica.com/api/v1/login"
 
