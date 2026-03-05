@@ -5,15 +5,19 @@ import psycopg2
 import shutil
 from sqlalchemy import create_engine
 from datetime import datetime, timedelta, timezone
+from loguru import logger
 
-meteo_username = os.getenv('XTRADERS_USERNAME')
-meteo_password = os.getenv('XTRADERS_PASSWORD')
+epias_username = os.getenv('EPIAS_USERNAME')
+epias_password = os.getenv('EPIAS_PASSWORD')
 
 db_user = os.getenv('SUPABASE_USER')
 db_password = os.getenv('SUPABASE_PASSWORD')
 
 connection_str = f"postgresql+psycopg2://{db_user}:{db_password}@aws-0-us-east-2.pooler.supabase.com:5432/postgres"
 engine = create_engine(connection_str)
+
+meteo_username = os.getenv('XTRADERS_USERNAME')
+meteo_password = os.getenv('XTRADERS_PASSWORD')
 
 url = "https://api-markets.meteologica.com/api/v1/login"
 
@@ -26,16 +30,17 @@ response = requests.post(url, json=data)
 
 if response.status_code == 200:
     response_data = response.json()
-    print("Token Expiration Date:", response_data.get("expiration_date"))
+    logger.success(f"Login successful. Token expires at: {response_data.get('expiration_date')}")
 else:
-    print(f"Error: {response.status_code}, Message: {response.text}")
+    logger.error(f"Login failed! Status: {response.status_code}, Response: {response.text}")
+    exit()
 
 turkey_timezone = timezone(timedelta(hours=3))
 selected_ref_date = datetime.now(turkey_timezone) - timedelta(days=1)
 ref_year = selected_ref_date.year
 ref_month = selected_ref_date.month
 ref_day = selected_ref_date.day
-print(f"Year: {ref_year}, Month: {ref_month}, Day: {ref_day}")
+logger.info(f"Target reference date: {ref_year}-{ref_month:02}-{ref_day:02}")
 
 #-----------------------------------------------------------------------------------------------------------
 
@@ -53,14 +58,14 @@ for data, data_code in zip(endpoints.keys(), endpoints.values()):
         response = requests.get(
             url=f"https://api-markets.meteologica.com/api/v1/contents/{data_code}/historical_data/{ref_year}/{ref_month}",
             params={"token": response_data.get("token")})
-        print(f"{ref_year}-{ref_month} {data} data extracted...")
+        logger.info(f"{ref_year}-{ref_month} {data} data extracted...")
         
     else:
 
         response = requests.get(
             url=f"https://api-markets.meteologica.com/api/v1/contents/{data_code}/historical_data/{ref_year}/{ref_month-1}",
             params={"token": response_data.get("token")})
-        print(f"{ref_year}-{ref_month-1} {data} data extracted...")
+        logger.info(f"{ref_year}-{ref_month-1} {data} data extracted...")
 
     zip_filename = f'historical_data_{data}.zip'
     with open(zip_filename, 'wb') as file:
@@ -68,7 +73,7 @@ for data, data_code in zip(endpoints.keys(), endpoints.values()):
 
     extract_dir = f"historical_data_{data}"
     shutil.unpack_archive(zip_filename, extract_dir)
-    print(f"{zip_filename} exported to: {extract_dir}")
+    logger.debug(f"{zip_filename} exported to: {extract_dir}")
 
     if selected_ref_date.day == 2:
         data_files = [file for file in os.listdir(f'historical_data_{data}') if ('post' not in file) & (file.startswith(f'{data_code}_{ref_year}{ref_month-1:02}{(selected_ref_date - timedelta(days=2)).day:02}11'))]
@@ -83,11 +88,11 @@ for data, data_code in zip(endpoints.keys(), endpoints.values()):
     final_data = pd.DataFrame(list(df['data'].values))
     final_data = final_data[['From yyyy-mm-dd hh:mm','forecast']].copy()
     final_data.columns = ['date',f'{data}_forecast']
-    final_data['date'] = pd.to_datetime(final_data['date'], format='%Y-%m-%d %H:%M:%S')
+    final_data['date'] = pd.to_datetime(final_data['date'])
 
     if os.path.exists(zip_filename):
         os.remove(zip_filename)
-        print(f"{zip_filename} deleted.")
+        logger.debug(f"Temporary files for {zip_filename} removed.")
 
     pred_data.append(final_data[final_data['date'].dt.date == selected_ref_date.date()])
 
@@ -96,6 +101,11 @@ ref_df = pd.concat(processed_data, axis=1)
 
 #-----------------------------------------------------------------------------------------------------------
 
-with engine.begin() as conn:
-    
-    ref_df.to_sql('historical_forecast', conn, if_exists='append', index=True, schema='meteologica', method='multi')
+try:
+    with engine.begin() as conn:
+        
+        ref_df.to_sql('historical_forecast', conn, if_exists='append', index=True, schema='meteologica', method='multi')
+        logger.success(f"Historical forecasts for {ref_year}-{ref_month:02}-{ref_day:02} uploaded to the database!")
+
+except Exception as e:
+        logger.critical(f"Database upload failed: {e}")
