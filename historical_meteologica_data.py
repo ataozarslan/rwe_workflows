@@ -36,6 +36,7 @@ else:
     exit()
 
 turkey_timezone = timezone(timedelta(hours=3))
+today_date = datetime.now(turkey_timezone)
 selected_ref_date = datetime.now(turkey_timezone) - timedelta(days=1)
 ref_year = selected_ref_date.year
 ref_month = selected_ref_date.month
@@ -94,7 +95,8 @@ for data, data_code in zip(endpoints.keys(), endpoints.values()):
         os.remove(zip_filename)
         logger.debug(f"Temporary files for {zip_filename} removed.")
 
-    pred_data.append(final_data[final_data['date'].dt.date == selected_ref_date.date()])
+    pred_data.append(final_data[(final_data['date'].dt.date == selected_ref_date.date()) | 
+                                (final_data['date'].dt.date == today_date.date())])
 
 processed_data = [df.set_index('date') for df in pred_data]
 ref_df = pd.concat(processed_data, axis=1)
@@ -103,7 +105,17 @@ ref_df = pd.concat(processed_data, axis=1)
 
 try:
     with engine.begin() as conn:
-        
+
+        timestamps = ref_df.index.unique().tolist()
+
+        conn.execute(
+            text(f"""
+                DELETE FROM meteologica.historical_forecast
+                WHERE date IN :timestamps
+                """),
+            {"timestamps": tuple(timestamps)}
+        )
+
         ref_df.to_sql('historical_forecast', conn, if_exists='append', index=True, schema='meteologica', method='multi')
         logger.success(f"Historical forecasts for {ref_year}-{ref_month:02}-{ref_day:02} uploaded to the database!")
 
