@@ -24,7 +24,7 @@ jobs:
 
     - name: Run script
       run: |
-        python meteologica_daily_data.py
+        python historical_meteologica_data.py
       env:
         SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
         SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
