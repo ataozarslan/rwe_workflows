@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import psycopg2
 import shutil
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta, timezone
 from loguru import logger
 
