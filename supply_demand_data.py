@@ -111,7 +111,7 @@ supply_demand_df = pd.DataFrame(all_data)
 sb_user = os.getenv('SUPABASE_USER')
 sb_password = os.getenv('SUPABASE_PASSWORD')
 
-connection_str = f"postgresql+psycopg2://{sb_user}:{sb_password}@aws-0-us-east-2.pooler.supabase.com:5432/postgres"
+connection_str = f"postgresql+psycopg2://{sb_user}:{sb_password}@aws-0-us-east-2.pooler.supabase.com:6543/postgres"
 engine = create_engine(connection_str)
 
 target_date = (datetime.now(turkey_timezone) - timedelta(days=14)).date().isoformat()

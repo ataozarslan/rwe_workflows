@@ -13,7 +13,7 @@ epias_password = os.getenv('EPIAS_PASSWORD')
 db_user = os.getenv('SUPABASE_USER')
 db_password = os.getenv('SUPABASE_PASSWORD')
 
-connection_str = f"postgresql+psycopg2://{db_user}:{db_password}@aws-0-us-east-2.pooler.supabase.com:5432/postgres"
+connection_str = f"postgresql+psycopg2://{db_user}:{db_password}@aws-0-us-east-2.pooler.supabase.com:6543/postgres"
 engine = create_engine(connection_str)
 
 meteo_username = os.getenv('XTRADERS_USERNAME')
