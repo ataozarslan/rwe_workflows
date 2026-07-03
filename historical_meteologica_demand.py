@@ -73,16 +73,15 @@ for data_code, data in zip(data_dict.keys(), data_dict.values()):
     if data == 'ens':
         forecast_hour = 12
     elif data == 'ensext':
-        forecast_hour = 00
+        forecast_hour = 0
 
     if selected_ref_date.day == 1:
-        data_files = [file for file in os.listdir(extract_dir) if ('post' not in file) & (file.startswith(f'{data_code}_{ref_year}{ref_month-1:02}{(selected_ref_date - timedelta(days=1)).day:02}{forecast_hour}'))]
+        data_files = [file for file in os.listdir(extract_dir) if ('post' not in file) & (file.startswith(f'{data_code}_{ref_year}{ref_month-1:02}{(selected_ref_date - timedelta(days=1)).day:02}{forecast_hour:02}00.json'))]
 
     else:
-        data_files = [file for file in os.listdir(extract_dir) if ('post' not in file) & (file.startswith(f'{data_code}_{ref_year}{ref_month:02}{(selected_ref_date - timedelta(days=1)).day:02}{forecast_hour}'))]
+        data_files = [file for file in os.listdir(extract_dir) if ('post' not in file) & (file.startswith(f'{data_code}_{ref_year}{ref_month:02}{(selected_ref_date - timedelta(days=1)).day:02}{forecast_hour:02}00.json'))]
 
     df = pd.read_json(extract_dir + '/' + data_files[0])
-    logger.info(f"{data_files[0]} files opened and red...")
     final_data = pd.DataFrame(list(df['data'].values))
     final_data = final_data[['From yyyy-mm-dd hh:mm', 'Bottom', 'Average', 'Top']].copy()
     final_data.columns = ['date',f'forecast_{data_dict[data_code]}_low', f'forecast_{data_dict[data_code]}_avg', f'forecast_{data_dict[data_code]}_high']
