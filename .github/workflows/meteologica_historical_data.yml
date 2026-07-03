@@ -1,8 +1,8 @@
-name: Daily Meteologica Historical Forecast Data Fetch
+name: Daily Meteologica Historical Demand Forecast Data Fetch
 
 on:
   schedule:
-    - cron: '0 5 * * *'  # UTC 05:00 = Türkiye saatiyle 08:00
+    - cron: '0 3 * * *'  # UTC 05:00 = Türkiye saatiyle 08:00
   workflow_dispatch:
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
 
     - name: Run script
       run: |
-        python historical_meteologica_data.py
+        python historical_meteologica_demand.py
       env:
         SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
         SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
