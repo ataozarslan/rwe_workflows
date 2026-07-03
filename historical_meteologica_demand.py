@@ -89,6 +89,7 @@ for data_code, data in zip(data_dict.keys(), data_dict.values()):
     final_data['date'] = pd.to_datetime(final_data['date'])
     pred_data.append(final_data[(final_data['date'].dt.date >= selected_ref_date.date()) &
                                 (final_data['date'].dt.date <= selected_ref_end_date.date())])
+    logger.success(f"{data} files opened and extracted successfully...")
 
 processed_data = [df.set_index('date') for df in pred_data]
 ref_df = pd.concat(processed_data, axis=1)
