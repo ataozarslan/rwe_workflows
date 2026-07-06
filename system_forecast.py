@@ -23,7 +23,7 @@ engine = create_engine(connection_str)
 turkey_timezone = timezone(timedelta(hours=3))
 today_start = datetime.now(turkey_timezone).replace(hour=0, minute=0, second=0, microsecond=0)
 d1_start = today_start - timedelta(days=1)
-end_time = datetime.now(tz=turkey_tz) - timedelta(hours=1)
+end_time = datetime.now(turkey_timezone) - timedelta(hours=1)
 
 #--------------------------------------------- Data Preparation -----------------------------------------------------------
 
