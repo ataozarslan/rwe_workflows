@@ -1,5 +1,5 @@
 chronos-forecasting==2.2.2
 darts==0.43.0
-python-dotenv==1.2.1
 SQLAlchemy==2.0.49
 xlrd==2.0.2
+loguru==0.7.3
