@@ -1,4 +1,4 @@
-name: Daily EPIAS Data Fetch
+name: Daily System Forecast Run
 
 on:
   schedule:
