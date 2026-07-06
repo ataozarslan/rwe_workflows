@@ -4,10 +4,9 @@ import requests
 import numpy as np
 import pandas as pd
 import psycopg2
-import pytz
 from sqlalchemy import create_engine
 from datetime import datetime, timedelta, timezone
-from sklearn.metrics import confusion_matrix, root_mean_squared_error, r2_score
+from sklearn.metrics import root_mean_squared_error, r2_score
 from darts import TimeSeries
 from chronos import BaseChronosPipeline, Chronos2Pipeline
 from loguru import logger
@@ -21,8 +20,8 @@ password = os.getenv("SUPABASE_PASSWORD")
 connection_str = f"postgresql+psycopg2://{user}:{password}@aws-0-us-east-2.pooler.supabase.com:5432/postgres"
 engine = create_engine(connection_str)
 
-turkey_tz = pytz.timezone("Europe/Istanbul")
-today_start = datetime.now(tz=turkey_tz).replace(hour=0, minute=0, second=0, microsecond=0)
+turkey_timezone = timezone(timedelta(hours=3))
+today_start = datetime.now(turkey_timezone).replace(hour=0, minute=0, second=0, microsecond=0)
 d1_start = today_start - timedelta(days=1)
 end_time = datetime.now(tz=turkey_tz) - timedelta(hours=1)
 
