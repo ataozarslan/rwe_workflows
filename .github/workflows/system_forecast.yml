@@ -1,9 +1,12 @@
 name: Daily System Forecast Run
 
 on:
-  schedule:
-    - cron: '30 1 * * *'
   workflow_dispatch:
+    inputs:
+      triggered_by:
+        description: 'Trigger Source'
+        required: false
+        default: 'supabase'
 
 jobs:
   run-script:
@@ -18,13 +21,23 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Cache venv
+      id: cache_venv
+      uses: actions/cache@v4
+      with:
+        path: .venv
+        key: venv-${{ hashFiles('requirements_system_forecast.txt') }}
+
     - name: Install dependencies
+      if: steps.cache_venv.outputs.cache-hit != 'true'
+
       run: |
-        pip install -r requirements_system_forecast.txt
+        python -m venv .venv
+        .venv_main/bin/pip install -r requirements_system_forecast.txt
 
     - name: Run script
       run: |
-        python system_forecast.py
+        .venv_main/bin/python system_forecast.py
       env:
         SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
         SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}

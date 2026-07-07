@@ -175,7 +175,6 @@ updated_yal_yat = updated_yal_yat[updated_yal_yat['net'] != 0].copy()
 updated_yal_yat = updated_yal_yat[['date', 'net']]
 updated_yal_yat.columns = ['date', 'system_direction']
 updated_yal_yat['date'] = pd.to_datetime(updated_yal_yat['date']).dt.tz_localize(None)
-logger.info(f"Last valid date in yal_yat: {updated_yal_yat['date'].max()}")
 
 dgp_df = pd.concat([dgp_df, updated_yal_yat])
 dgp_df['date'] = pd.to_datetime(dgp_df['date'])
@@ -262,6 +261,10 @@ for day in range(len(val)):
     
     for i in range(5-loop_no):
         pred_dict[f't+{i+1}'].append(val_pred_df.iloc[[i]])
+
+    if day % 18 == 0:
+        progress_percentage = int((day / len(val)) * 100)
+        print(f"{progress_percentage}% of the pipeline has been completed")
     
 dfs = {step: pd.concat(rows, ignore_index=True) for step, rows in pred_dict.items()}
 
