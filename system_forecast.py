@@ -174,9 +174,11 @@ updated_yal_yat = pd.DataFrame.from_records(response['items'])
 updated_yal_yat = updated_yal_yat[updated_yal_yat['net'] != 0].copy()
 updated_yal_yat = updated_yal_yat[['date', 'net']]
 updated_yal_yat.columns = ['date', 'system_direction']
+updated_yal_yat['date'] = pd.to_datetime(updated_yal_yat['date']).dt.tz_localize(None)
 logger.info(f"Last valid date in yal_yat: {updated_yal_yat['date'].max()}")
 
 dgp_df = pd.concat([dgp_df, updated_yal_yat])
+dgp_df['date'] = pd.to_datetime(dgp_df['date'])
 df = pd.merge(new_df, dgp_df, on='date', how='left')
 df.set_index('date', inplace=True)
 ts_df = TimeSeries.from_dataframe(df)
