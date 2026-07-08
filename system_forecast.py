@@ -10,6 +10,8 @@ from sklearn.metrics import root_mean_squared_error, r2_score
 from darts import TimeSeries
 from chronos import BaseChronosPipeline, Chronos2Pipeline
 from loguru import logger
+import warnings
+warnings.filterwarnings("ignore")
 
 epias_username = os.getenv('EPIAS_USERNAME')
 epias_password = os.getenv('EPIAS_PASSWORD')
@@ -264,7 +266,7 @@ for day in range(len(val)):
 
     if day % 18 == 0:
         progress_percentage = int((day / len(val)) * 100)
-        print(f"{progress_percentage}% of the pipeline has been completed")
+        logger.info(f"{progress_percentage}% of the pipeline has been completed")
     
 dfs = {step: pd.concat(rows, ignore_index=True) for step, rows in pred_dict.items()}
 
