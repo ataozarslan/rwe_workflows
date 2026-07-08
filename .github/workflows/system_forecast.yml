@@ -33,11 +33,11 @@ jobs:
 
       run: |
         python -m venv .venv
-        .venv_main/bin/pip install -r requirements_system_forecast.txt
+        .venv/bin/pip install -r requirements_system_forecast.txt
 
     - name: Run script
       run: |
-        .venv_main/bin/python system_forecast.py
+        .venv/bin/python system_forecast.py
       env:
         SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
         SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
