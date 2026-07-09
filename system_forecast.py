@@ -27,6 +27,21 @@ today_start = datetime.now(turkey_timezone).replace(hour=0, minute=0, second=0, 
 d1_start = today_start - timedelta(days=1)
 end_time = datetime.now(turkey_timezone) - timedelta(hours=1)
 
+def safe_post(url, json=None, headers=None, retries=3, timeout=60):
+    for i in range(retries):
+        try:
+            response = requests.post(url, json=json, headers=headers, timeout=timeout)
+            if response.status_code == 200:
+                return response
+            else:
+                logger.error(f"[{i+1}/{retries}] HTTP {response.status_code} error, retrying...")
+        except requests.exceptions.ReadTimeout:
+            logger.error(f"[{i+1}/{retries}] ReadTimeout error, retrying...")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"[{i+1}/{retries}] Other error: {e}, retrying...")
+        time.sleep(5)
+    raise Exception(f"Request to {url} failed after {retries} retries.")
+
 #--------------------------------------------- Data Preparation -----------------------------------------------------------
 
 query = """
@@ -130,28 +145,12 @@ data = {
     "username":epias_username,
     "password":epias_password}
 
-response_tgt = requests.post(url, data=data, headers={"Content-Type": "application/x-www-form-urlencoded","Accept": "text/plain"}, timeout=30)
+response_tgt = safe_post(url, json=data, headers={"Content-Type": "application/x-www-form-urlencoded","Accept": "text/plain"}, timeout=30)
 
 if response_tgt.status_code == 201:
     tgt_code = response_tgt.text
 else:
     logger.error(f"Error: {response_tgt.status_code}, Message: {response_tgt.text}")
-
-def safe_post(url, json=None, headers=None, retries=3, timeout=60):
-    for i in range(retries):
-        try:
-            response = requests.post(url, json=json, headers=headers, timeout=timeout)
-            if response.status_code == 200:
-                return response
-            else:
-                logger.error(f"[{i+1}/{retries}] HTTP {response.status_code} error, retrying...")
-        except requests.exceptions.ReadTimeout:
-            logger.error(f"[{i+1}/{retries}] ReadTimeout error, retrying...")
-        except requests.exceptions.RequestException as e:
-            logger.error(f"[{i+1}/{retries}] Other error: {e}, retrying...")
-        time.sleep(5)
-    raise Exception(f"Request to {url} failed after {retries} retries.")
-
 
 service_url = "https://seffaflik.epias.com.tr/electricity-service/v1/markets/bpm/data/order-summary-up"
 
