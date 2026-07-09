@@ -145,7 +145,7 @@ data = {
     "username":epias_username,
     "password":epias_password}
 
-response_tgt = safe_post(url, json=data, headers={"Content-Type": "application/x-www-form-urlencoded","Accept": "text/plain"}, timeout=30)
+response_tgt = requests.post(url, data=data, headers={"Content-Type": "application/x-www-form-urlencoded","Accept": "text/plain"}, timeout=30)
 
 if response_tgt.status_code == 201:
     tgt_code = response_tgt.text
