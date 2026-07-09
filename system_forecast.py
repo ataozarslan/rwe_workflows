@@ -172,7 +172,8 @@ else:
     logger.error(f"Error: {response_url.status_code}, Message: {response_url.text}")
 
 updated_yal_yat = pd.DataFrame.from_records(response['items'])
-updated_yal_yat = updated_yal_yat[updated_yal_yat['net'] != 0].copy()
+last_index = updated_yal_yat['net'].replace(0, np.nan).last_valid_index()
+updated_yal_yat = updated_yal_yat.loc[:last_index].copy()
 updated_yal_yat = updated_yal_yat[['date', 'net']]
 updated_yal_yat.columns = ['date', 'system_direction']
 updated_yal_yat['date'] = pd.to_datetime(updated_yal_yat['date']).dt.tz_localize(None)
