@@ -1,3 +1,4 @@
+import io
 import os
 import time
 import requests
@@ -334,6 +335,38 @@ for q in quantile_cols:
     logger.info(f"Quantile {q} -> RMSE: {round(rmse, 2)}, R-squared: {round(r2, 2)}")
 
 best_q_t5 = min(results_t5, key=lambda x: results_t5[x]['rmse'])
+
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+BUCKET_NAME = f"system-direction-forecast-result/{pd.Timestamp(today_start).month_name()}"
+
+for t_period in dfs.keys():
+
+    df_cleaned = dfs[t_period].drop(columns=['id', 'target_name']).set_index('date')
+    
+    min_date = dfs[t_period]['date'].min()
+    max_date = dfs[t_period]['date'].max()
+    FILE_NAME = f"system_forecast_{min_date}_{max_date}_{t_period}.csv"
+    
+    csv_buffer = io.StringIO()
+    df_cleaned.to_csv(csv_buffer, index=True)
+    csv_data = csv_buffer.getvalue().encode('utf-8')
+    
+    url = f"{SUPABASE_URL}/storage/v1/object/{BUCKET_NAME}/{FILE_NAME}"
+    
+    headers = {
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "apiKey": SUPABASE_KEY,
+        "Content-Type": "text/csv",
+        "x-upsert": "true"
+    }
+
+    response = requests.post(url, headers=headers, data=csv_data)
+
+    if response.status_code == 200:
+        logger.info(f"{FILE_NAME} loaded successfully to Supabase Buckets via REST API!")
+    else:
+        logger.error(f"An error occurred while loading {FILE_NAME} ({response.status_code}): {response.text}")
 
 best_q_results = pd.DataFrame({
     'date': d1_start.date(),
