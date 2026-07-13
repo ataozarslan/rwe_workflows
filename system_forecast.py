@@ -364,7 +364,7 @@ for t_period in dfs.keys():
     response = requests.post(url, headers=headers, data=csv_data)
 
     if response.status_code == 200:
-        logger.info(f"{FILE_NAME} loaded successfully to Supabase Buckets via REST API!")
+        logger.success(f"{FILE_NAME} loaded successfully to Supabase Buckets via REST API!")
     else:
         logger.error(f"An error occurred while loading {FILE_NAME} ({response.status_code}): {response.text}")
 
