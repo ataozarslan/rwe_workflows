@@ -43,3 +43,5 @@ jobs:
         SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
         EPIAS_USERNAME: ${{ secrets.EPIAS_USERNAME }}
         EPIAS_PASSWORD: ${{ secrets.EPIAS_PASSWORD }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
