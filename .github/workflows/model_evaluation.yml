@@ -1,0 +1,43 @@
+name: Daily Forecast Evaluation Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      triggered_by:
+        description: 'Trigger Source'
+        required: false
+        default: 'supabase'
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Cache venv
+      id: cache_venv
+      uses: actions/cache@v4
+      with:
+        path: .venv
+        key: venv-${{ hashFiles('requirements_forecast_evaluation.txt') }}
+
+    - name: Install dependencies
+      if: steps.cache_venv.outputs.cache-hit != 'true'
+
+      run: |
+        python -m venv .venv
+        .venv/bin/pip install -r requirements_forecast_evaluation.txt
+
+    - name: Run script
+      run: |
+        .venv/bin/python forecast_evaluation.py
+      env:
+        SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
+        SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}

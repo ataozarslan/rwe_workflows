@@ -1,0 +1,8 @@
+numpy==1.26.4
+pandas==2.2.3
+plotly==5.24.1
+kaleido==0.2.1
+psycopg2-binary==2.9.10
+SQLAlchemy==2.0.52     
+darts==0.33.0
+loguru==0.7.3
