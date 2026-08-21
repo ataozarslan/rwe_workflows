@@ -20,24 +20,17 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-
-    - name: Cache venv
-      id: cache_venv
-      uses: actions/cache@v4
-      with:
-        path: .venv
-        key: venv-${{ hashFiles('requirements_forecast_evaluation.txt') }}
+        cache: 'pip'
+        cache-dependency-path: 'requirements_forecast_evaluation.txt'
 
     - name: Install dependencies
-      if: steps.cache_venv.outputs.cache-hit != 'true'
-
       run: |
-        python -m venv .venv
-        .venv/bin/pip install -r requirements_forecast_evaluation.txt
+        python -m pip install --upgrade pip
+        pip install -r requirements_forecast_evaluation.txt
 
     - name: Run script
       run: |
-        .venv/bin/python forecast_evaluation.py
+        python forecast_evaluation.py
       env:
         SUPABASE_USER: ${{ secrets.SUPABASE_USER }}
         SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
