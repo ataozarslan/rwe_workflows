@@ -41,7 +41,7 @@ logger.add(
 )
 
 # Validation period selection
-validation_period = 4*168
+validation_period = 2*168
 
 if pd.Timestamp(today_start).day_name() == 'Sunday':
     validation_days = 'Sunday'
