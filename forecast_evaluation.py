@@ -42,26 +42,22 @@ logger.add(
 
 # Validation period selection
 validation_period = 2*168
+validation_weeks = round(validation_period / 168)
+validation_days_interval = validation_weeks * 7
 
-if pd.Timestamp(today_start).day_name() == 'Sunday':
-    validation_days = 'Sunday'
-else:
-    validation_days = 'Monday - Saturday'
 
 query = text("""
 SELECT date, price AS actual_price
 FROM epias.ptf
-WHERE 
-    date >= CURRENT_DATE - INTERVAL '27 days'
-    AND date < CURRENT_DATE + INTERVAL '1 day'
-    
-    AND (
-        -- SUNDAY = 0, SATURDAY = 6
-        (EXTRACT(DOW FROM CURRENT_DATE) = 0 AND EXTRACT(DOW FROM date) = 0)
-        OR 
-        (EXTRACT(DOW FROM CURRENT_DATE) != 0 AND EXTRACT(DOW FROM date) != 0)
-    );
-""")
+    WHERE 
+        date >= CURRENT_DATE - (:days * INTERVAL '1 day')
+        AND date < CURRENT_DATE + INTERVAL '1 day'
+        AND (
+            (EXTRACT(DOW FROM CURRENT_DATE) = 0 AND EXTRACT(DOW FROM date) = 0)
+            OR 
+            (EXTRACT(DOW FROM CURRENT_DATE) != 0 AND EXTRACT(DOW FROM date) != 0)
+        )
+""").bindparams(days=validation_days_interval)
 
 with engine.connect() as conn:
     ptf_df = pd.read_sql(query, con=conn)
@@ -75,17 +71,15 @@ logger.info("Realized MCP data fetched...")
 query = text("""
 SELECT date, min_price AS meteologica_min, avg_price AS meteologica_avg, max_price AS meteologica_max
 FROM public.meteologica_forecast
-WHERE 
-    date >= CURRENT_DATE - INTERVAL '27 days'
-    AND date < CURRENT_DATE + INTERVAL '1 day'
-    
-    AND (
-        -- SUNDAY = 0, SATURDAY = 6
-        (EXTRACT(DOW FROM CURRENT_DATE) = 0 AND EXTRACT(DOW FROM date) = 0)
-        OR 
-        (EXTRACT(DOW FROM CURRENT_DATE) != 0 AND EXTRACT(DOW FROM date) != 0)
-    );
-""")
+    WHERE 
+        date >= CURRENT_DATE - (:days * INTERVAL '1 day')
+        AND date < CURRENT_DATE + INTERVAL '1 day'
+        AND (
+            (EXTRACT(DOW FROM CURRENT_DATE) = 0 AND EXTRACT(DOW FROM date) = 0)
+            OR 
+            (EXTRACT(DOW FROM CURRENT_DATE) != 0 AND EXTRACT(DOW FROM date) != 0)
+        )
+""").bindparams(days=validation_days_interval)
 
 with engine.connect() as conn:
     meteologica_forecast = pd.read_sql(query, con=conn)
@@ -97,17 +91,15 @@ price_df = pd.merge(ptf_df, meteologica_forecast, on='date', how='left').sort_va
 query = text("""
 SELECT date, low_price AS model_low, best_price AS model_best, high_price AS model_high
 FROM public.model_forecast_ptf
-WHERE 
-    date >= CURRENT_DATE - INTERVAL '27 days'
-    AND date < CURRENT_DATE + INTERVAL '1 day'
-    
-    AND (
-        -- SUNDAY = 0, SATURDAY = 6
-        (EXTRACT(DOW FROM CURRENT_DATE) = 0 AND EXTRACT(DOW FROM date) = 0)
-        OR 
-        (EXTRACT(DOW FROM CURRENT_DATE) != 0 AND EXTRACT(DOW FROM date) != 0)
-    );
-""")
+    WHERE 
+        date >= CURRENT_DATE - (:days * INTERVAL '1 day')
+        AND date < CURRENT_DATE + INTERVAL '1 day'
+        AND (
+            (EXTRACT(DOW FROM CURRENT_DATE) = 0 AND EXTRACT(DOW FROM date) = 0)
+            OR 
+            (EXTRACT(DOW FROM CURRENT_DATE) != 0 AND EXTRACT(DOW FROM date) != 0)
+        )
+""").bindparams(days=validation_days_interval)
 
 with engine.connect() as conn:
     model_forecast = pd.read_sql(query, con=conn)
@@ -173,17 +165,15 @@ except Exception as e:
 query = text("""
 SELECT date, min_price AS meteologica_min, avg_price AS meteologica_avg, max_price AS meteologica_max
 FROM public."meteologica_forecast_d+2"
-WHERE 
-    date >= CURRENT_DATE - INTERVAL '27 days'
-    AND date < CURRENT_DATE + INTERVAL '1 day'
-    
-    AND (
-        -- SUNDAY = 0, SATURDAY = 6
-        (EXTRACT(DOW FROM CURRENT_DATE) = 0 AND EXTRACT(DOW FROM date) = 0)
-        OR 
-        (EXTRACT(DOW FROM CURRENT_DATE) != 0 AND EXTRACT(DOW FROM date) != 0)
-    );
-""")
+    WHERE 
+        date >= CURRENT_DATE - (:days * INTERVAL '1 day')
+        AND date < CURRENT_DATE + INTERVAL '1 day'
+        AND (
+            (EXTRACT(DOW FROM CURRENT_DATE) = 0 AND EXTRACT(DOW FROM date) = 0)
+            OR 
+            (EXTRACT(DOW FROM CURRENT_DATE) != 0 AND EXTRACT(DOW FROM date) != 0)
+        )
+""").bindparams(days=validation_days_interval)
 
 with engine.connect() as conn:
     meteologica_forecast = pd.read_sql(query, con=conn)
@@ -195,17 +185,15 @@ price_df = pd.merge(ptf_df, meteologica_forecast, on='date', how='left').sort_va
 query = text("""
 SELECT date, low_price AS model_low, best_price AS model_best, high_price AS model_high
 FROM public.model_forecast_sfc
-WHERE 
-    date >= CURRENT_DATE - INTERVAL '27 days'
-    AND date < CURRENT_DATE + INTERVAL '1 day'
-    
-    AND (
-        -- SUNDAY = 0, SATURDAY = 6
-        (EXTRACT(DOW FROM CURRENT_DATE) = 0 AND EXTRACT(DOW FROM date) = 0)
-        OR 
-        (EXTRACT(DOW FROM CURRENT_DATE) != 0 AND EXTRACT(DOW FROM date) != 0)
-    );
-""")
+    WHERE 
+        date >= CURRENT_DATE - (:days * INTERVAL '1 day')
+        AND date < CURRENT_DATE + INTERVAL '1 day'
+        AND (
+            (EXTRACT(DOW FROM CURRENT_DATE) = 0 AND EXTRACT(DOW FROM date) = 0)
+            OR 
+            (EXTRACT(DOW FROM CURRENT_DATE) != 0 AND EXTRACT(DOW FROM date) != 0)
+        )
+""").bindparams(days=validation_days_interval)
 
 with engine.connect() as conn:
     model_forecast = pd.read_sql(query, con=conn)
